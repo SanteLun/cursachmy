@@ -1,0 +1,40 @@
+﻿Построение начато 16.05.2025 19:36:20.
+     1>Проект "C:\Users\msalo\OneDrive\Dokument\Visual Studio 2010\Projects\cursachDLL\cursachDLL\cursachDLL.vcxproj" в узле 2 (целевые объекты rebuild).
+     1>_PrepareForClean:
+         Файл "Debug\cursachDLL.lastbuildstate" удаляется.
+       InitializeBuildStatus:
+         Создание "Debug\cursachDLL.unsuccessfulbuild", так как было задано "AlwaysCreate".
+       GenerateTargetFrameworkMonikerAttribute:
+       Целевой объект "GenerateTargetFrameworkMonikerAttribute" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       ClCompile:
+         D:\VS\VC\bin\CL.exe /c /AI"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /Zi /clr /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDLL /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"StdAfx.h" /Fp"Debug\cursachDLL.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /TP /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" /analyze- /errorReport:prompt Stdafx.cpp /clr:nostdlib 
+         Stdafx.cpp
+         D:\VS\VC\bin\CL.exe /c /AI"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /Zi /clr /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDLL /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\cursachDLL.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /TP /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" /analyze- /errorReport:prompt AssemblyInfo.cpp cursachDLL.cpp /clr:nostdlib 
+         AssemblyInfo.cpp
+         cursachDLL.cpp
+     1>c:\users\msalo\onedrive\dokument\visual studio 2010\projects\cursachdll\cursachdll\PolishNotationLib.h(136): warning C4244: инициализация: преобразование "wchar_t" в "char", возможна потеря данных
+     1>c:\users\msalo\onedrive\dokument\visual studio 2010\projects\cursachdll\cursachdll\PolishNotationLib.h(315): warning C4244: аргумент: преобразование "wchar_t" в "char", возможна потеря данных
+     1>c:\users\msalo\onedrive\dokument\visual studio 2010\projects\cursachdll\cursachdll\PolishNotationLib.h(332): warning C4244: аргумент: преобразование "wchar_t" в "char", возможна потеря данных
+     1>c:\users\msalo\onedrive\dokument\visual studio 2010\projects\cursachdll\cursachdll\ShiftFoldLib.h(69): warning C4244: инициализация: преобразование "wchar_t" в "char", возможна потеря данных
+         Создание кода...
+         D:\VS\VC\bin\CL.exe /c /Zi /clr /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDLL /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /TP /analyze- /errorReport:prompt "C:\Users\msalo\AppData\Local\Temp\.NETFramework,Version=v4.0.AssemblyAttributes.cpp"
+         .NETFramework,Version=v4.0.AssemblyAttributes.cpp
+       ResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Debug\app.res" app.rc 
+       Link:
+         D:\VS\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\msalo\OneDrive\Dokument\Visual Studio 2010\Projects\cursachDLL\Debug\cursachDLL.dll" /INCREMENTAL /NOLOGO /MANIFEST /ManifestFile:"Debug\cursachDLL.dll.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\msalo\OneDrive\Dokument\Visual Studio 2010\Projects\cursachDLL\Debug\cursachDLL.pdb" /ASSEMBLYDEBUG /TLBID:1 /DYNAMICBASE /FIXED:NO /NXCOMPAT /MACHINE:X86 /DLL Debug\app.res
+         Debug\Stdafx.obj
+         Debug\AssemblyInfo.obj
+         Debug\cursachDLL.obj
+         "Debug\.NETFramework,Version=v4.0.AssemblyAttributes.obj"
+         cursachDLL.vcxproj -> C:\Users\msalo\OneDrive\Dokument\Visual Studio 2010\Projects\cursachDLL\Debug\cursachDLL.dll
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\msalo\OneDrive\Dokument\Visual Studio 2010\Projects\cursachDLL\Debug\cursachDLL.dll;#2" /manifest Debug\cursachDLL.dll.intermediate.manifest
+       FinalizeBuildStatus:
+         Файл "Debug\cursachDLL.unsuccessfulbuild" удаляется.
+         Обращение к "Debug\cursachDLL.lastbuildstate".
+     1>Построение проекта "C:\Users\msalo\OneDrive\Dokument\Visual Studio 2010\Projects\cursachDLL\cursachDLL\cursachDLL.vcxproj" завершено (целевые объекты rebuild).
+
+Построение успешно завершено.
+
+Затраченное время: 00:00:01.25
