@@ -1,0 +1,2239 @@
+#pragma once
+
+// импорты
+#include "ЛеxиcалАналйзер.h"
+#include "СйнтаxАналйзер.h"
+#include "Аутхентиcатион.h"
+#include "ТабХандлерс.h"
+
+// правильные директивы для Windows Forms
+#include "стдафx.h"
+#using <System.dll>
+#using <System.Data.dll>
+#using <System.Drawing.dll>
+#using <System.Windows.Forms.dll>
+#using <Microsoft.VisualBasic.dll>
+#using "..\..\cурсачДЛЛ\Дебуг\cурсачДЛЛ.dll"
+
+using namespace cursachDLL;
+	using namespace System;
+	using namespace System::ComponentModel;
+	using namespace System::Collections;
+using namespace System::Collections::Generic;
+	using namespace System::Windows::Forms;
+	using namespace System::Data;
+	using namespace System::Drawing;
+using namespace System::Text;
+
+namespace cursach {
+
+	/// <summary>
+	/// Основная форма приложения
+	/// </summary>
+	public ref class Form1 : public System::Windows::Forms::Form
+	{
+	private:
+		// флаг авторизации
+		bool _isAuthenticated;
+		
+		// объект для авторизации
+		Authentication^ _auth;
+
+		// компоненты для вкладок
+		TextBox^ _txtSimpleList;
+		TextBox^ _txtParseExpression;
+		
+		// компоненты для матриц
+		System::Windows::Forms::NumericUpDown^ nudMatrixARows;
+		System::Windows::Forms::NumericUpDown^ nudMatrixACols;
+		System::Windows::Forms::NumericUpDown^ nudMatrixBRows;
+		System::Windows::Forms::NumericUpDown^ nudMatrixBCols;
+		System::Windows::Forms::TableLayoutPanel^ panelMatrixA;
+		System::Windows::Forms::TableLayoutPanel^ panelMatrixB;
+		System::Windows::Forms::TableLayoutPanel^ panelMatrixC;
+		System::Windows::Forms::TableLayoutPanel^ panelInitialValue;
+		
+		TextBox^ _txtPolishCode;
+		TextBox^ _txtPolishResult;
+
+		System::Windows::Forms::Label^  label1;
+		System::Windows::Forms::TextBox^  txtKey;
+		System::Windows::Forms::TextBox^  txtPlainText;
+		System::Windows::Forms::Label^  label2;
+		System::Windows::Forms::Button^  btnEncrypt;
+		System::Windows::Forms::Button^  btnDecrypt;
+		System::Windows::Forms::TextBox^  txtCipherText;
+		System::Windows::Forms::Label^  label3;
+
+		System::Windows::Forms::Label^  label4;
+		System::Windows::Forms::TextBox^  txtSourceCode;
+		System::Windows::Forms::Button^  btnParse;
+		System::Windows::Forms::Label^  label5;
+		System::Windows::Forms::TextBox^  txtParseResult;
+
+		System::Windows::Forms::TextBox^  txtUsername;
+		System::Windows::Forms::Label^  label6;
+		System::Windows::Forms::TextBox^  txtPassword;
+		System::Windows::Forms::Label^  label7;
+		System::Windows::Forms::Button^  btnLogin;
+		System::Windows::Forms::Button^  btnRegister;
+		System::Windows::Forms::Label^  lblLoginStatus;
+
+		System::Windows::Forms::Label^ lblMatrixA;
+		System::Windows::Forms::TextBox^ txtMatrixA;
+		System::Windows::Forms::Label^ lblMatrixB;
+		System::Windows::Forms::TextBox^ txtMatrixB;
+		System::Windows::Forms::Label^ lblMatrixC;
+		System::Windows::Forms::TextBox^ txtMatrixC;
+		System::Windows::Forms::Label^ lblInitialValue;
+		System::Windows::Forms::TextBox^ txtInitialValue;
+		System::Windows::Forms::Label^ lblTimeRange;
+		System::Windows::Forms::TextBox^ txtTimeStart;
+		System::Windows::Forms::TextBox^ txtTimeEnd;
+		System::Windows::Forms::Label^ lblTimeStep;
+		System::Windows::Forms::TextBox^ txtTimeStep;
+		System::Windows::Forms::Button^ btnSolveODE;
+		System::Windows::Forms::TextBox^ txtEulerResult;
+
+		// компоненты для многофункционального tab
+		System::Windows::Forms::TextBox^ txtFunctionCall;
+		System::Windows::Forms::Button^ btnExecuteFunction;
+		System::Windows::Forms::TextBox^ txtResult;
+		System::Windows::Forms::Label^ lblFunctionCall;
+		System::Windows::Forms::Label^ lblResult;
+
+		// компоненты для управления пользователями
+		System::Windows::Forms::ListView^ lvUsers;
+		System::Windows::Forms::Button^ btnAddUser;
+		System::Windows::Forms::Button^ btnEditUser;
+		System::Windows::Forms::Button^ btnDeleteUser;
+		System::Windows::Forms::Button^ btnRefreshUsers;
+		System::Windows::Forms::Label^ lblUsersList;
+
+		// Элементы вкладки "Простой список"
+		System::Windows::Forms::Label^ lblIdentifierName;
+		System::Windows::Forms::TextBox^ txtIdentifierName;
+		System::Windows::Forms::Button^ btnAddIdentifier;
+		System::Windows::Forms::Button^ btnRemoveIdentifier;
+		System::Windows::Forms::Button^ btnFindIdentifier;
+		System::Windows::Forms::ListBox^ lstIdentifiers;
+		System::Windows::Forms::Label^ lblIdentifiersCount;
+		System::Windows::Forms::Label^ lblSearchResult;
+
+		// Список идентификаторов
+		List<String^>^ _identifiersList;
+
+		// Элементы вкладки "Свертка сдвигом"
+		System::Windows::Forms::TextBox^ txtInput;
+		System::Windows::Forms::TextBox^ txtGrammar;
+		System::Windows::Forms::TextBox^ txtParseSteps;
+		System::Windows::Forms::Button^ btnParseShiftFold;
+		System::Windows::Forms::Label^ lblInput;
+		System::Windows::Forms::Label^ lblGrammar;
+		System::Windows::Forms::Label^ lblParseSteps;
+		System::Windows::Forms::Label^ lblParseResult;
+
+		// Элементы вкладки "Польская нотация"
+		System::Windows::Forms::TextBox^ txtInfixExpression;
+		System::Windows::Forms::TextBox^ txtPostfixExpression;
+		System::Windows::Forms::TextBox^ txtPostfixResult;
+		System::Windows::Forms::Button^ btnConvertToPostfix;
+		System::Windows::Forms::Button^ btnEvaluatePostfix;
+		System::Windows::Forms::Label^ lblInfixExpression;
+		System::Windows::Forms::Label^ lblPostfixExpression;
+		System::Windows::Forms::Label^ lblPostfixResult;
+
+	public:
+		Form1(void)
+		{
+			// устанавливаем русскую локализацию
+			System::Threading::Thread::CurrentThread->CurrentUICulture = gcnew System::Globalization::CultureInfo("ru-RU");
+			System::Threading::Thread::CurrentThread->CurrentCulture = gcnew System::Globalization::CultureInfo("ru-RU");
+			
+			InitializeComponent();
+			
+			// устанавливаем состояние авторизации
+			_isAuthenticated = false;
+			_auth = gcnew Authentication();
+			
+			// блокируем вкладки до авторизации
+			tabEncryption->Enabled = false;
+			tabLanguage->Enabled = false;
+			tabEuler->Enabled = false;
+			tabSimpleList->Enabled = false;
+			tabShiftFold->Enabled = false;
+			tabPolish->Enabled = false;
+			tabMultiFunction->Enabled = false;
+
+			// Создаем список идентификаторов
+			_identifiersList = gcnew List<String^>();
+			
+			// Инициализируем элементы вкладок
+			InitializeEulerTab();
+			InitializeShiftFoldTab();
+			InitializePolishNotationTab();
+		}
+
+	protected:
+		/// <summary>
+		/// Освобождаем все используемые ресурсы
+		/// </summary>
+		~Form1()
+		{
+			if (components)
+			{
+				delete components;
+			}
+		}
+
+	private:
+		/// <summary>
+		/// Компоненты формы
+		/// </summary>
+		System::ComponentModel::Container ^components;
+
+		System::Windows::Forms::TabControl^  tabControl1;
+		System::Windows::Forms::TabPage^  tabEncryption;
+		System::Windows::Forms::TabPage^  tabLanguage;
+		System::Windows::Forms::TabPage^  tabLogin;
+		System::Windows::Forms::TabPage^  tabEuler;
+		System::Windows::Forms::TabPage^  tabSimpleList;
+		System::Windows::Forms::TabPage^  tabShiftFold;
+		System::Windows::Forms::TabPage^  tabPolish;
+		System::Windows::Forms::TabPage^  tabMultiFunction; // вкладка для функций с множественными возвращаемыми значениями
+		System::Windows::Forms::TabPage^  tabUsers; // вкладка для управления пользователями
+
+#pragma region Windows Form Designer generated code
+		/// <summary>
+		/// Метод инициализации компонентов
+		/// </summary>
+		void InitializeComponent(void)
+		{
+			this->tabControl1 = (gcnew System::Windows::Forms::TabControl());
+			this->tabLogin = (gcnew System::Windows::Forms::TabPage());
+			this->lblLoginStatus = (gcnew System::Windows::Forms::Label());
+			this->btnRegister = (gcnew System::Windows::Forms::Button());
+			this->btnLogin = (gcnew System::Windows::Forms::Button());
+			this->txtPassword = (gcnew System::Windows::Forms::TextBox());
+			this->label7 = (gcnew System::Windows::Forms::Label());
+			this->txtUsername = (gcnew System::Windows::Forms::TextBox());
+			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->tabEncryption = (gcnew System::Windows::Forms::TabPage());
+			this->txtCipherText = (gcnew System::Windows::Forms::TextBox());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->btnDecrypt = (gcnew System::Windows::Forms::Button());
+			this->btnEncrypt = (gcnew System::Windows::Forms::Button());
+			this->txtPlainText = (gcnew System::Windows::Forms::TextBox());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->txtKey = (gcnew System::Windows::Forms::TextBox());
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->tabLanguage = (gcnew System::Windows::Forms::TabPage());
+			this->txtParseResult = (gcnew System::Windows::Forms::TextBox());
+			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->btnParse = (gcnew System::Windows::Forms::Button());
+			this->txtSourceCode = (gcnew System::Windows::Forms::TextBox());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->tabEuler = (gcnew System::Windows::Forms::TabPage());
+			this->tabSimpleList = (gcnew System::Windows::Forms::TabPage());
+			this->tabShiftFold = (gcnew System::Windows::Forms::TabPage());
+			this->tabPolish = (gcnew System::Windows::Forms::TabPage());
+			this->tabMultiFunction = (gcnew System::Windows::Forms::TabPage());
+			this->txtFunctionCall = (gcnew System::Windows::Forms::TextBox());
+			this->btnExecuteFunction = (gcnew System::Windows::Forms::Button());
+			this->txtResult = (gcnew System::Windows::Forms::TextBox());
+			this->lblFunctionCall = (gcnew System::Windows::Forms::Label());
+			this->lblResult = (gcnew System::Windows::Forms::Label());
+			this->tabUsers = (gcnew System::Windows::Forms::TabPage());
+			this->lvUsers = (gcnew System::Windows::Forms::ListView());
+			this->btnAddUser = (gcnew System::Windows::Forms::Button());
+			this->btnEditUser = (gcnew System::Windows::Forms::Button());
+			this->btnDeleteUser = (gcnew System::Windows::Forms::Button());
+			this->btnRefreshUsers = (gcnew System::Windows::Forms::Button());
+			this->lblUsersList = (gcnew System::Windows::Forms::Label());
+			this->lblIdentifierName = (gcnew System::Windows::Forms::Label());
+			this->txtIdentifierName = (gcnew System::Windows::Forms::TextBox());
+			this->btnAddIdentifier = (gcnew System::Windows::Forms::Button());
+			this->btnRemoveIdentifier = (gcnew System::Windows::Forms::Button());
+			this->btnFindIdentifier = (gcnew System::Windows::Forms::Button());
+			this->lstIdentifiers = (gcnew System::Windows::Forms::ListBox());
+			this->lblIdentifiersCount = (gcnew System::Windows::Forms::Label());
+			this->lblSearchResult = (gcnew System::Windows::Forms::Label());
+			this->tabControl1->SuspendLayout();
+			this->tabLogin->SuspendLayout();
+			this->tabEncryption->SuspendLayout();
+			this->tabLanguage->SuspendLayout();
+			this->tabMultiFunction->SuspendLayout();
+			this->tabUsers->SuspendLayout();
+			this->SuspendLayout();
+			// 
+			// tabControl1
+			// 
+			this->tabControl1->Controls->Add(this->tabLogin);
+			this->tabControl1->Controls->Add(this->tabEncryption);
+			this->tabControl1->Controls->Add(this->tabLanguage);
+			this->tabControl1->Controls->Add(this->tabEuler);
+			this->tabControl1->Controls->Add(this->tabSimpleList);
+			this->tabControl1->Controls->Add(this->tabShiftFold);
+			this->tabControl1->Controls->Add(this->tabPolish);
+			this->tabControl1->Controls->Add(this->tabMultiFunction);
+			this->tabControl1->Controls->Add(this->tabUsers);
+			this->tabControl1->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->tabControl1->Location = System::Drawing::Point(0, 0);
+			this->tabControl1->Name = L"табCонтрол1";
+			this->tabControl1->SelectedIndex = 0;
+			this->tabControl1->Size = System::Drawing::Size(800, 500);
+			this->tabControl1->TabIndex = 0;
+			this->tabControl1->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::TabControl1_SelectedIndexChanged);
+			// 
+			// tabLogin
+			// 
+			this->tabLogin->Controls->Add(this->lblLoginStatus);
+			this->tabLogin->Controls->Add(this->btnRegister);
+			this->tabLogin->Controls->Add(this->btnLogin);
+			this->tabLogin->Controls->Add(this->txtPassword);
+			this->tabLogin->Controls->Add(this->label7);
+			this->tabLogin->Controls->Add(this->txtUsername);
+			this->tabLogin->Controls->Add(this->label6);
+			this->tabLogin->Location = System::Drawing::Point(4, 22);
+			this->tabLogin->Name = L"табЛогин";
+			this->tabLogin->Padding = System::Windows::Forms::Padding(3);
+			this->tabLogin->Size = System::Drawing::Size(792, 474);
+			this->tabLogin->TabIndex = 2;
+			this->tabLogin->Text = L"Авторизация";
+			this->tabLogin->UseVisualStyleBackColor = true;
+			// 
+			// lblLoginStatus
+			// 
+			this->lblLoginStatus->AutoSize = true;
+			this->lblLoginStatus->Location = System::Drawing::Point(244, 236);
+			this->lblLoginStatus->Name = L"лблЛогинСтатус";
+			this->lblLoginStatus->Size = System::Drawing::Size(0, 13);
+			this->lblLoginStatus->TabIndex = 6;
+			// 
+			// btnRegister
+			// 
+			this->btnRegister->Location = System::Drawing::Point(316, 193);
+			this->btnRegister->Name = L"бтнРегистер";
+			this->btnRegister->Size = System::Drawing::Size(94, 23);
+			this->btnRegister->TabIndex = 5;
+			this->btnRegister->Text = L"Регистрация";
+			this->btnRegister->UseVisualStyleBackColor = true;
+			this->btnRegister->Click += gcnew System::EventHandler(this, &Form1::btnRegister_Click);
+			// 
+			// btnLogin
+			// 
+			this->btnLogin->Location = System::Drawing::Point(215, 193);
+			this->btnLogin->Name = L"бтнЛогин";
+			this->btnLogin->Size = System::Drawing::Size(75, 23);
+			this->btnLogin->TabIndex = 4;
+			this->btnLogin->Text = L"Войти";
+			this->btnLogin->UseVisualStyleBackColor = true;
+			this->btnLogin->Click += gcnew System::EventHandler(this, &Form1::btnLogin_Click);
+			// 
+			// txtPassword
+			// 
+			this->txtPassword->Location = System::Drawing::Point(316, 144);
+			this->txtPassword->Name = L"тxтПассворд";
+			this->txtPassword->PasswordChar = '*';
+			this->txtPassword->Size = System::Drawing::Size(163, 20);
+			this->txtPassword->TabIndex = 3;
+			// 
+			// label7
+			// 
+			this->label7->AutoSize = true;
+			this->label7->Location = System::Drawing::Point(215, 147);
+			this->label7->Name = L"лабел7";
+			this->label7->Size = System::Drawing::Size(48, 13);
+			this->label7->TabIndex = 2;
+			this->label7->Text = L"Пароль:";
+			// 
+			// txtUsername
+			// 
+			this->txtUsername->Location = System::Drawing::Point(316, 104);
+			this->txtUsername->Name = L"тxтУсернаме";
+			this->txtUsername->Size = System::Drawing::Size(163, 20);
+			this->txtUsername->TabIndex = 1;
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Location = System::Drawing::Point(215, 107);
+			this->label6->Name = L"лабел6";
+			this->label6->Size = System::Drawing::Size(41, 13);
+			this->label6->TabIndex = 0;
+			this->label6->Text = L"Логин:";
+			// 
+			// tabEncryption
+			// 
+			this->tabEncryption->Controls->Add(this->txtCipherText);
+			this->tabEncryption->Controls->Add(this->label3);
+			this->tabEncryption->Controls->Add(this->btnDecrypt);
+			this->tabEncryption->Controls->Add(this->btnEncrypt);
+			this->tabEncryption->Controls->Add(this->txtPlainText);
+			this->tabEncryption->Controls->Add(this->label2);
+			this->tabEncryption->Controls->Add(this->txtKey);
+			this->tabEncryption->Controls->Add(this->label1);
+			this->tabEncryption->Location = System::Drawing::Point(4, 22);
+			this->tabEncryption->Name = L"табЕнcрйптион";
+			this->tabEncryption->Padding = System::Windows::Forms::Padding(3);
+			this->tabEncryption->Size = System::Drawing::Size(792, 474);
+			this->tabEncryption->TabIndex = 0;
+			this->tabEncryption->Text = L"Шифрование";
+			this->tabEncryption->UseVisualStyleBackColor = true;
+			// 
+			// txtCipherText
+			// 
+			this->txtCipherText->Location = System::Drawing::Point(186, 179);
+			this->txtCipherText->Multiline = true;
+			this->txtCipherText->Name = L"тxтCипхерТеxт";
+			this->txtCipherText->Size = System::Drawing::Size(431, 111);
+			this->txtCipherText->TabIndex = 7;
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(183, 163);
+			this->label3->Name = L"лабел3";
+			this->label3->Size = System::Drawing::Size(122, 13);
+			this->label3->TabIndex = 6;
+			this->label3->Text = L"Зашифрованный текст:";
+			// 
+			// btnDecrypt
+			// 
+			this->btnDecrypt->Location = System::Drawing::Point(334, 135);
+			this->btnDecrypt->Name = L"бтнДеcрйпт";
+			this->btnDecrypt->Size = System::Drawing::Size(127, 23);
+			this->btnDecrypt->TabIndex = 5;
+			this->btnDecrypt->Text = L"Расшифровать";
+			this->btnDecrypt->UseVisualStyleBackColor = true;
+			this->btnDecrypt->Click += gcnew System::EventHandler(this, &Form1::btnDecrypt_Click);
+			// 
+			// btnEncrypt
+			// 
+			this->btnEncrypt->Location = System::Drawing::Point(186, 135);
+			this->btnEncrypt->Name = L"бтнЕнcрйпт";
+			this->btnEncrypt->Size = System::Drawing::Size(127, 23);
+			this->btnEncrypt->TabIndex = 4;
+			this->btnEncrypt->Text = L"Зашифровать";
+			this->btnEncrypt->UseVisualStyleBackColor = true;
+			this->btnEncrypt->Click += gcnew System::EventHandler(this, &Form1::btnEncrypt_Click);
+			// 
+			// txtPlainText
+			// 
+			this->txtPlainText->Location = System::Drawing::Point(186, 68);
+			this->txtPlainText->Multiline = true;
+			this->txtPlainText->Name = L"тxтПлаинТеxт";
+			this->txtPlainText->Size = System::Drawing::Size(431, 61);
+			this->txtPlainText->TabIndex = 3;
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(183, 52);
+			this->label2->Name = L"лабел2";
+			this->label2->Size = System::Drawing::Size(93, 13);
+			this->label2->TabIndex = 2;
+			this->label2->Text = L"Исходный текст:";
+			// 
+			// txtKey
+			// 
+			this->txtKey->Location = System::Drawing::Point(186, 25);
+			this->txtKey->Name = L"тxтКей";
+			this->txtKey->Size = System::Drawing::Size(431, 20);
+			this->txtKey->TabIndex = 1;
+			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->Location = System::Drawing::Point(183, 9);
+			this->label1->Name = L"лабел1";
+			this->label1->Size = System::Drawing::Size(36, 13);
+			this->label1->TabIndex = 0;
+			this->label1->Text = L"Ключ:";
+			// 
+			// tabLanguage
+			// 
+			this->tabLanguage->Controls->Add(this->txtParseResult);
+			this->tabLanguage->Controls->Add(this->label5);
+			this->tabLanguage->Controls->Add(this->btnParse);
+			this->tabLanguage->Controls->Add(this->txtSourceCode);
+			this->tabLanguage->Controls->Add(this->label4);
+			this->tabLanguage->Location = System::Drawing::Point(4, 22);
+			this->tabLanguage->Name = L"табЛангуаге";
+			this->tabLanguage->Padding = System::Windows::Forms::Padding(3);
+			this->tabLanguage->Size = System::Drawing::Size(792, 474);
+			this->tabLanguage->TabIndex = 1;
+			this->tabLanguage->Text = L"Язык";
+			this->tabLanguage->UseVisualStyleBackColor = true;
+			// 
+			// txtParseResult
+			// 
+			this->txtParseResult->Location = System::Drawing::Point(183, 222);
+			this->txtParseResult->Multiline = true;
+			this->txtParseResult->Name = L"тxтПарсеРесулт";
+			this->txtParseResult->ReadOnly = true;
+			this->txtParseResult->Size = System::Drawing::Size(426, 149);
+			this->txtParseResult->TabIndex = 4;
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->Location = System::Drawing::Point(183, 206);
+			this->label5->Name = L"лабел5";
+			this->label5->Size = System::Drawing::Size(62, 13);
+			this->label5->TabIndex = 3;
+			this->label5->Text = L"Результат:";
+			// 
+			// btnParse
+			// 
+			this->btnParse->Location = System::Drawing::Point(183, 175);
+			this->btnParse->Name = L"бтнПарсе";
+			this->btnParse->Size = System::Drawing::Size(129, 23);
+			this->btnParse->TabIndex = 2;
+			this->btnParse->Text = L"Анализировать";
+			this->btnParse->UseVisualStyleBackColor = true;
+			this->btnParse->Click += gcnew System::EventHandler(this, &Form1::btnParse_Click);
+			// 
+			// txtSourceCode
+			// 
+			this->txtSourceCode->Location = System::Drawing::Point(183, 24);
+			this->txtSourceCode->Multiline = true;
+			this->txtSourceCode->Name = L"тxцоурcеCоде";
+			this->txtSourceCode->Size = System::Drawing::Size(426, 145);
+			this->txtSourceCode->TabIndex = 1;
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Location = System::Drawing::Point(183, 8);
+			this->label4->Name = L"лабел4";
+			this->label4->Size = System::Drawing::Size(96, 13);
+			this->label4->TabIndex = 0;
+			this->label4->Text = L"Исходный kod:";
+			// 
+			// tabEuler
+			// 
+			this->tabEuler->Controls->Add(this->btnSolveODE);
+			this->tabEuler->Controls->Add(this->txtEulerResult);
+			this->tabEuler->Controls->Add(this->lblInitialValue);
+			this->tabEuler->Controls->Add(this->txtInitialValue);
+			this->tabEuler->Controls->Add(this->txtTimeStep);
+			this->tabEuler->Controls->Add(this->lblTimeStep);
+			this->tabEuler->Controls->Add(this->txtTimeEnd);
+			this->tabEuler->Controls->Add(this->txtTimeStart);
+			this->tabEuler->Controls->Add(this->lblTimeRange);
+			this->tabEuler->Controls->Add(this->lblMatrixC);
+			this->tabEuler->Controls->Add(this->txtMatrixC);
+			this->tabEuler->Controls->Add(this->lblMatrixB);
+			this->tabEuler->Controls->Add(this->txtMatrixB);
+			this->tabEuler->Controls->Add(this->lblMatrixA);
+			this->tabEuler->Controls->Add(this->txtMatrixA);
+			this->tabEuler->Location = System::Drawing::Point(4, 22);
+			this->tabEuler->Name = L"табЕулер";
+			this->tabEuler->Size = System::Drawing::Size(792, 474);
+			this->tabEuler->TabIndex = 3;
+			this->tabEuler->Text = L"Метод Эйлера";
+			this->tabEuler->UseVisualStyleBackColor = true;
+			// 
+			// lblMatrixA
+			// 
+			this->lblMatrixA = (gcnew System::Windows::Forms::Label());
+			this->lblMatrixA->AutoSize = true;
+			this->lblMatrixA->Location = System::Drawing::Point(20, 20);
+			this->lblMatrixA->Name = L"лблМатриxА";
+			this->lblMatrixA->Size = System::Drawing::Size(66, 13);
+			this->lblMatrixA->TabIndex = 0;
+			this->lblMatrixA->Text = L"Матрица A:";
+			// 
+			// txtMatrixA
+			// 
+			this->txtMatrixA = (gcnew System::Windows::Forms::TextBox());
+			this->txtMatrixA->Location = System::Drawing::Point(150, 17);
+			this->txtMatrixA->Name = L"тxтМатриxА";
+			this->txtMatrixA->Size = System::Drawing::Size(400, 20);
+			this->txtMatrixA->TabIndex = 1;
+			this->txtMatrixA->Text = L"1, 0, 0; 0, 1, 0; 0, 0, 1";
+			// 
+			// lblMatrixB
+			// 
+			this->lblMatrixB = (gcnew System::Windows::Forms::Label());
+			this->lblMatrixB->AutoSize = true;
+			this->lblMatrixB->Location = System::Drawing::Point(20, 50);
+			this->lblMatrixB->Name = L"лблМатриxБ";
+			this->lblMatrixB->Size = System::Drawing::Size(66, 13);
+			this->lblMatrixB->TabIndex = 2;
+			this->lblMatrixB->Text = L"Матрица B:";
+			// 
+			// txtMatrixB
+			// 
+			this->txtMatrixB = (gcnew System::Windows::Forms::TextBox());
+			this->txtMatrixB->Location = System::Drawing::Point(150, 47);
+			this->txtMatrixB->Name = L"тxтМатриxБ";
+			this->txtMatrixB->Size = System::Drawing::Size(400, 20);
+			this->txtMatrixB->TabIndex = 3;
+			this->txtMatrixB->Text = L"0, 1, 0; 0, 0, 1; 1, 0, 0";
+			// 
+			// lblMatrixC
+			// 
+			this->lblMatrixC = (gcnew System::Windows::Forms::Label());
+			this->lblMatrixC->AutoSize = true;
+			this->lblMatrixC->Location = System::Drawing::Point(20, 80);
+			this->lblMatrixC->Name = L"лблМатриxC";
+			this->lblMatrixC->Size = System::Drawing::Size(66, 13);
+			this->lblMatrixC->TabIndex = 4;
+			this->lblMatrixC->Text = L"Матрица C:";
+			// 
+			// txtMatrixC
+			// 
+			this->txtMatrixC = (gcnew System::Windows::Forms::TextBox());
+			this->txtMatrixC->Location = System::Drawing::Point(150, 77);
+			this->txtMatrixC->Name = L"тxтМатриxC";
+			this->txtMatrixC->Size = System::Drawing::Size(400, 20);
+			this->txtMatrixC->TabIndex = 5;
+			this->txtMatrixC->Text = L"0, 0, 1; 1, 0, 0; 0, 1, 0";
+			// 
+			// lblTimeRange
+			// 
+			this->lblTimeRange = (gcnew System::Windows::Forms::Label());
+			this->lblTimeRange->AutoSize = true;
+			this->lblTimeRange->Location = System::Drawing::Point(20, 110);
+			this->lblTimeRange->Name = L"лблТимеРанге";
+			this->lblTimeRange->Size = System::Drawing::Size(122, 13);
+			this->lblTimeRange->TabIndex = 6;
+			this->lblTimeRange->Text = L"Временной интервал:";
+			// 
+			// txtTimeStart
+			// 
+			this->txtTimeStart = (gcnew System::Windows::Forms::TextBox());
+			this->txtTimeStart->Location = System::Drawing::Point(150, 107);
+			this->txtTimeStart->Name = L"тxтТимеСтарт";
+			this->txtTimeStart->Size = System::Drawing::Size(60, 20);
+			this->txtTimeStart->TabIndex = 7;
+			this->txtTimeStart->Text = L"0";
+			// 
+			// txtTimeEnd
+			// 
+			this->txtTimeEnd = (gcnew System::Windows::Forms::TextBox());
+			this->txtTimeEnd->Location = System::Drawing::Point(220, 107);
+			this->txtTimeEnd->Name = L"тxтТимеЕнд";
+			this->txtTimeEnd->Size = System::Drawing::Size(60, 20);
+			this->txtTimeEnd->TabIndex = 8;
+			this->txtTimeEnd->Text = L"10";
+			// 
+			// lblTimeStep
+			// 
+			this->lblTimeStep = (gcnew System::Windows::Forms::Label());
+			this->lblTimeStep->AutoSize = true;
+			this->lblTimeStep->Location = System::Drawing::Point(290, 110);
+			this->lblTimeStep->Name = L"лблТимеСтеп";
+			this->lblTimeStep->Size = System::Drawing::Size(34, 13);
+			this->lblTimeStep->TabIndex = 9;
+			this->lblTimeStep->Text = L"Шаг:";
+			// 
+			// txtTimeStep
+			// 
+			this->txtTimeStep = (gcnew System::Windows::Forms::TextBox());
+			this->txtTimeStep->Location = System::Drawing::Point(330, 107);
+			this->txtTimeStep->Name = L"тxтТимеСтеп";
+			this->txtTimeStep->Size = System::Drawing::Size(60, 20);
+			this->txtTimeStep->TabIndex = 10;
+			this->txtTimeStep->Text = L"0.1";
+			//
+			// lblInitialValue
+			//
+			this->lblInitialValue = (gcnew System::Windows::Forms::Label());
+			this->lblInitialValue->AutoSize = true;
+			this->lblInitialValue->Location = System::Drawing::Point(20, 140);
+			this->lblInitialValue->Name = L"лблИнитиялВалуе";
+			this->lblInitialValue->Size = System::Drawing::Size(127, 13);
+			this->lblInitialValue->TabIndex = 11;
+			this->lblInitialValue->Text = L"Начальное значение:";
+			//
+			// txtInitialValue
+			//
+			this->txtInitialValue = (gcnew System::Windows::Forms::TextBox());
+			this->txtInitialValue->Location = System::Drawing::Point(150, 137);
+			this->txtInitialValue->Name = L"тxтИнитиялВалуе";
+			this->txtInitialValue->Size = System::Drawing::Size(400, 20);
+			this->txtInitialValue->TabIndex = 12;
+			this->txtInitialValue->Text = L"1, 0, 0";
+			// 
+			// btnSolveODE
+			// 
+			this->btnSolveODE = (gcnew System::Windows::Forms::Button());
+			this->btnSolveODE->Location = System::Drawing::Point(150, 170);
+			this->btnSolveODE->Name = L"бтнСолвеОДЕ";
+			this->btnSolveODE->Size = System::Drawing::Size(150, 23);
+			this->btnSolveODE->TabIndex = 13;
+			this->btnSolveODE->Text = L"Решить";
+			this->btnSolveODE->UseVisualStyleBackColor = true;
+			this->btnSolveODE->Click += gcnew System::EventHandler(this, &Form1::btnSolveODE_Click);
+			// 
+			// txtEulerResult
+			//
+			this->txtEulerResult = (gcnew System::Windows::Forms::TextBox());
+			this->txtEulerResult->Location = System::Drawing::Point(20, 210);
+			this->txtEulerResult->Multiline = true;
+			this->txtEulerResult->Name = L"тxтЕулерРесулт";
+			this->txtEulerResult->ReadOnly = true;
+			this->txtEulerResult->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+			this->txtEulerResult->Size = System::Drawing::Size(750, 250);
+			this->txtEulerResult->TabIndex = 14;
+			// 
+			// tabSimpleList
+			// 
+			this->tabSimpleList->Location = System::Drawing::Point(4, 22);
+			this->tabSimpleList->Name = L"табСимплеЛист";
+			this->tabSimpleList->Size = System::Drawing::Size(792, 474);
+			this->tabSimpleList->TabIndex = 4;
+			this->tabSimpleList->Text = L"Простой список";
+			this->tabSimpleList->UseVisualStyleBackColor = true;
+			// Настройка вкладки "Простой список"
+			this->tabSimpleList->Controls->Add(this->lblIdentifierName);
+			this->tabSimpleList->Controls->Add(this->txtIdentifierName);
+			this->tabSimpleList->Controls->Add(this->btnAddIdentifier);
+			this->tabSimpleList->Controls->Add(this->btnRemoveIdentifier);
+			this->tabSimpleList->Controls->Add(this->btnFindIdentifier);
+			this->tabSimpleList->Controls->Add(this->lstIdentifiers);
+			this->tabSimpleList->Controls->Add(this->lblIdentifiersCount);
+			this->tabSimpleList->Controls->Add(this->lblSearchResult);
+			// 
+			// tabShiftFold
+			// 
+			this->tabShiftFold->Controls->Add(this->txtInput);
+			this->tabShiftFold->Controls->Add(this->txtGrammar);
+			this->tabShiftFold->Controls->Add(this->txtParseSteps);
+			this->tabShiftFold->Controls->Add(this->btnParseShiftFold);
+			this->tabShiftFold->Controls->Add(this->lblInput);
+			this->tabShiftFold->Controls->Add(this->lblGrammar);
+			this->tabShiftFold->Controls->Add(this->lblParseSteps);
+			this->tabShiftFold->Controls->Add(this->lblParseResult);
+			this->tabShiftFold->Location = System::Drawing::Point(4, 22);
+			this->tabShiftFold->Name = L"табШифтФолд";
+			this->tabShiftFold->Padding = System::Windows::Forms::Padding(3);
+			this->tabShiftFold->Size = System::Drawing::Size(792, 474);
+			this->tabShiftFold->TabIndex = 6;
+			this->tabShiftFold->Text = L"Свертка сдвигом";
+			this->tabShiftFold->UseVisualStyleBackColor = true;
+			
+			// txtInput
+			//
+			this->txtInput = (gcnew System::Windows::Forms::TextBox());
+			this->txtInput->Location = System::Drawing::Point(20, 40);
+			this->txtInput->Name = L"тxтИнпут";
+			this->txtInput->Size = System::Drawing::Size(400, 22);
+			this->txtInput->Text = L"id+id*id";
+			
+			// txtGrammar
+			//
+			this->txtGrammar = (gcnew System::Windows::Forms::TextBox());
+			this->txtGrammar->Location = System::Drawing::Point(20, 90);
+			this->txtGrammar->Multiline = true;
+			this->txtGrammar->Name = L"тxтГраммар";
+			this->txtGrammar->Size = System::Drawing::Size(400, 100);
+			this->txtGrammar->Text = L"E -> E+T | T\r\nT -> T*F | F\r\nF -> id";
+			
+			// txtParseSteps
+			//
+			this->txtParseSteps = (gcnew System::Windows::Forms::TextBox());
+			this->txtParseSteps->Location = System::Drawing::Point(20, 220);
+			this->txtParseSteps->Multiline = true;
+			this->txtParseSteps->ReadOnly = true;
+			this->txtParseSteps->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+			this->txtParseSteps->Name = L"тxтПарсеСтепс";
+			this->txtParseSteps->Size = System::Drawing::Size(700, 200);
+			
+			// lblInput
+			//
+			this->lblInput = (gcnew System::Windows::Forms::Label());
+			this->lblInput->AutoSize = true;
+			this->lblInput->Location = System::Drawing::Point(20, 20);
+			this->lblInput->Name = L"лблИнпут";
+			this->lblInput->Size = System::Drawing::Size(150, 13);
+			this->lblInput->Text = L"Входная строка:";
+			
+			// lblGrammar
+			//
+			this->lblGrammar = (gcnew System::Windows::Forms::Label());
+			this->lblGrammar->AutoSize = true;
+			this->lblGrammar->Location = System::Drawing::Point(20, 70);
+			this->lblGrammar->Name = L"лблГраммар";
+			this->lblGrammar->Size = System::Drawing::Size(150, 13);
+			this->lblGrammar->Text = L"Грамматика:";
+			
+			// lblParseSteps
+			//
+			this->lblParseSteps = (gcnew System::Windows::Forms::Label());
+			this->lblParseSteps->AutoSize = true;
+			this->lblParseSteps->Location = System::Drawing::Point(20, 200);
+			this->lblParseSteps->Name = L"лблПарсеСтепс";
+			this->lblParseSteps->Size = System::Drawing::Size(150, 13);
+			this->lblParseSteps->Text = L"Шаги разбора:";
+			
+			// lblParseResult
+			//
+			this->lblParseResult = (gcnew System::Windows::Forms::Label());
+			this->lblParseResult->AutoSize = true;
+			this->lblParseResult->Location = System::Drawing::Point(430, 40);
+			this->lblParseResult->Name = L"лблПарсеРесулт";
+			this->lblParseResult->Size = System::Drawing::Size(150, 13);
+			this->lblParseResult->Text = L"";
+
+			// btnParseShiftFold
+			//
+			this->btnParseShiftFold = (gcnew System::Windows::Forms::Button());
+			this->btnParseShiftFold->Location = System::Drawing::Point(450, 90);
+			this->btnParseShiftFold->Name = L"бтнПарсеШифтФолд";
+			this->btnParseShiftFold->Size = System::Drawing::Size(100, 25);
+			this->btnParseShiftFold->TabIndex = 7;
+			this->btnParseShiftFold->Text = L"Разобрать";
+			this->btnParseShiftFold->UseVisualStyleBackColor = true;
+			this->btnParseShiftFold->Click += gcnew System::EventHandler(this, &Form1::btnParseShiftFold_Click);
+			
+			// tabPolish
+			// 
+			this->tabPolish->Controls->Add(this->txtInfixExpression);
+			this->tabPolish->Controls->Add(this->txtPostfixExpression);
+			this->tabPolish->Controls->Add(this->txtPostfixResult);
+			this->tabPolish->Controls->Add(this->btnConvertToPostfix);
+			this->tabPolish->Controls->Add(this->btnEvaluatePostfix);
+			this->tabPolish->Controls->Add(this->lblInfixExpression);
+			this->tabPolish->Controls->Add(this->lblPostfixExpression);
+			this->tabPolish->Controls->Add(this->lblPostfixResult);
+			this->tabPolish->Location = System::Drawing::Point(4, 22);
+			this->tabPolish->Name = L"табПолиш";
+			this->tabPolish->Padding = System::Windows::Forms::Padding(3);
+			this->tabPolish->Size = System::Drawing::Size(792, 474);
+			this->tabPolish->TabIndex = 7;
+			this->tabPolish->Text = L"Польская нотация";
+			this->tabPolish->UseVisualStyleBackColor = true;
+			
+			// txtInfixExpression
+			//
+			this->txtInfixExpression = (gcnew System::Windows::Forms::TextBox());
+			this->txtInfixExpression->Location = System::Drawing::Point(20, 40);
+			this->txtInfixExpression->Name = L"тxтИнфиxЕxпрессион";
+			this->txtInfixExpression->Size = System::Drawing::Size(400, 22);
+			this->txtInfixExpression->Text = L"(3+4)*5";
+			
+			// txtPostfixExpression
+			//
+			this->txtPostfixExpression = (gcnew System::Windows::Forms::TextBox());
+			this->txtPostfixExpression->Location = System::Drawing::Point(20, 100);
+			this->txtPostfixExpression->Name = L"тxтПостфиxЕxпрессион";
+			this->txtPostfixExpression->ReadOnly = true;
+			this->txtPostfixExpression->Size = System::Drawing::Size(400, 22);
+			
+			// txtPostfixResult
+			//
+			this->txtPostfixResult = (gcnew System::Windows::Forms::TextBox());
+			this->txtPostfixResult->Location = System::Drawing::Point(20, 160);
+			this->txtPostfixResult->Name = L"тxтПостфиxРесулт";
+			this->txtPostfixResult->ReadOnly = true;
+			this->txtPostfixResult->Size = System::Drawing::Size(400, 22);
+			
+			// btnConvertToPostfix
+			//
+			this->btnConvertToPostfix = (gcnew System::Windows::Forms::Button());
+			this->btnConvertToPostfix->Location = System::Drawing::Point(450, 40);
+			this->btnConvertToPostfix->Name = L"бтнCонвертТоПостфиx";
+			this->btnConvertToPostfix->Size = System::Drawing::Size(120, 25);
+			this->btnConvertToPostfix->TabIndex = 8;
+			this->btnConvertToPostfix->Text = L"Конвертировать";
+			this->btnConvertToPostfix->UseVisualStyleBackColor = true;
+			this->btnConvertToPostfix->Click += gcnew System::EventHandler(this, &Form1::btnConvertToPostfix_Click);
+			
+			// btnEvaluatePostfix
+			//
+			this->btnEvaluatePostfix = (gcnew System::Windows::Forms::Button());
+			this->btnEvaluatePostfix->Location = System::Drawing::Point(450, 100);
+			this->btnEvaluatePostfix->Name = L"бтнЕвалуатеПостфиx";
+			this->btnEvaluatePostfix->Size = System::Drawing::Size(120, 25);
+			this->btnEvaluatePostfix->TabIndex = 9;
+			this->btnEvaluatePostfix->Text = L"Вычислить";
+			this->btnEvaluatePostfix->UseVisualStyleBackColor = true;
+			this->btnEvaluatePostfix->Click += gcnew System::EventHandler(this, &Form1::btnEvaluatePostfix_Click);
+			
+			// lblInfixExpression
+			//
+			this->lblInfixExpression = (gcnew System::Windows::Forms::Label());
+			this->lblInfixExpression->AutoSize = true;
+			this->lblInfixExpression->Location = System::Drawing::Point(20, 20);
+			this->lblInfixExpression->Name = L"лблИнфиxЕxпрессион";
+			this->lblInfixExpression->Size = System::Drawing::Size(150, 13);
+			this->lblInfixExpression->Text = L"Инфиксное выражение:";
+			
+			// lblPostfixExpression
+			//
+			this->lblPostfixExpression = (gcnew System::Windows::Forms::Label());
+			this->lblPostfixExpression->AutoSize = true;
+			this->lblPostfixExpression->Location = System::Drawing::Point(20, 80);
+			this->lblPostfixExpression->Name = L"лблПостфиxЕxпрессион";
+			this->lblPostfixExpression->Size = System::Drawing::Size(200, 13);
+			this->lblPostfixExpression->Text = L"Постфиксное выражение:";
+			
+			// lblPostfixResult
+			//
+			this->lblPostfixResult = (gcnew System::Windows::Forms::Label());
+			this->lblPostfixResult->AutoSize = true;
+			this->lblPostfixResult->Location = System::Drawing::Point(20, 140);
+			this->lblPostfixResult->Name = L"лблПостфиxРесулт";
+			this->lblPostfixResult->Size = System::Drawing::Size(150, 13);
+			this->lblPostfixResult->Text = L"Результат вйчисленийа:";
+			// 
+			// tabMultiFunction
+			// 
+			this->tabMultiFunction->Controls->Add(this->lblResult);
+			this->tabMultiFunction->Controls->Add(this->lblFunctionCall);
+			this->tabMultiFunction->Controls->Add(this->txtResult);
+			this->tabMultiFunction->Controls->Add(this->btnExecuteFunction);
+			this->tabMultiFunction->Controls->Add(this->txtFunctionCall);
+			this->tabMultiFunction->Location = System::Drawing::Point(4, 22);
+			this->tabMultiFunction->Name = L"табМултиФунcтион";
+			this->tabMultiFunction->Size = System::Drawing::Size(792, 474);
+			this->tabMultiFunction->TabIndex = 7;
+			this->tabMultiFunction->Text = L"Множественные значения";
+			this->tabMultiFunction->UseVisualStyleBackColor = true;
+			// 
+			// txtFunctionCall
+			// 
+			this->txtFunctionCall->Location = System::Drawing::Point(186, 36);
+			this->txtFunctionCall->Multiline = true;
+			this->txtFunctionCall->Name = L"тxтФунcтионCалл";
+			this->txtFunctionCall->Size = System::Drawing::Size(421, 87);
+			this->txtFunctionCall->TabIndex = 0;
+			// 
+			// btnExecuteFunction
+			// 
+			this->btnExecuteFunction->Location = System::Drawing::Point(186, 129);
+			this->btnExecuteFunction->Name = L"бтнЕxеcутеФунcтион";
+			this->btnExecuteFunction->Size = System::Drawing::Size(160, 23);
+			this->btnExecuteFunction->TabIndex = 1;
+			this->btnExecuteFunction->Text = L"Вйполнит функцийу";
+			this->btnExecuteFunction->UseVisualStyleBackColor = true;
+			this->btnExecuteFunction->Click += gcnew System::EventHandler(this, &Form1::btnExecuteFunction_Click);
+			// 
+			// txtResult
+			// 
+			this->txtResult->Location = System::Drawing::Point(186, 178);
+			this->txtResult->Multiline = true;
+			this->txtResult->Name = L"тxтРесулт";
+			this->txtResult->ReadOnly = true;
+			this->txtResult->Size = System::Drawing::Size(421, 236);
+			this->txtResult->TabIndex = 2;
+			// 
+			// lblFunctionCall
+			// 
+			this->lblFunctionCall->AutoSize = true;
+			this->lblFunctionCall->Location = System::Drawing::Point(183, 20);
+			this->lblFunctionCall->Name = L"лблФунcтионCалл";
+			this->lblFunctionCall->Size = System::Drawing::Size(88, 13);
+			this->lblFunctionCall->TabIndex = 3;
+			this->lblFunctionCall->Text = L"Вйзов функции:";
+			// 
+			// lblResult
+			// 
+			this->lblResult->AutoSize = true;
+			this->lblResult->Location = System::Drawing::Point(183, 162);
+			this->lblResult->Name = L"лблРесулт";
+			this->lblResult->Size = System::Drawing::Size(62, 13);
+			this->lblResult->TabIndex = 4;
+			this->lblResult->Text = L"Результат:";
+			// 
+			// tabUsers
+			// 
+			this->tabUsers->Controls->Add(this->lvUsers);
+			this->tabUsers->Controls->Add(this->btnAddUser);
+			this->tabUsers->Controls->Add(this->btnEditUser);
+			this->tabUsers->Controls->Add(this->btnDeleteUser);
+			this->tabUsers->Controls->Add(this->btnRefreshUsers);
+			this->tabUsers->Controls->Add(this->lblUsersList);
+			this->tabUsers->Location = System::Drawing::Point(4, 22);
+			this->tabUsers->Name = L"табУсерс";
+			this->tabUsers->Size = System::Drawing::Size(792, 474);
+			this->tabUsers->TabIndex = 8;
+			this->tabUsers->Text = L"Управление пользователями";
+			this->tabUsers->UseVisualStyleBackColor = true;
+			// 
+			// lvUsers
+			// 
+			this->lvUsers->Location = System::Drawing::Point(186, 36);
+			this->lvUsers->Name = L"лвУсерс";
+			this->lvUsers->Size = System::Drawing::Size(421, 236);
+			this->lvUsers->TabIndex = 0;
+			this->lvUsers->UseCompatibleStateImageBehavior = false;
+			this->lvUsers->View = System::Windows::Forms::View::Details;
+			// 
+			// btnAddUser
+			// 
+			this->btnAddUser->Location = System::Drawing::Point(186, 300);
+			this->btnAddUser->Name = L"бтнАддУсер";
+			this->btnAddUser->Size = System::Drawing::Size(160, 23);
+			this->btnAddUser->TabIndex = 1;
+			this->btnAddUser->Text = L"Добавить пользователя";
+			this->btnAddUser->UseVisualStyleBackColor = true;
+			this->btnAddUser->Click += gcnew System::EventHandler(this, &Form1::btnAddUser_Click);
+			// 
+			// btnEditUser
+			// 
+			this->btnEditUser->Location = System::Drawing::Point(186, 330);
+			this->btnEditUser->Name = L"бтнЕдитУсер";
+			this->btnEditUser->Size = System::Drawing::Size(160, 23);
+			this->btnEditUser->TabIndex = 2;
+			this->btnEditUser->Text = L"Изменить пользователя";
+			this->btnEditUser->UseVisualStyleBackColor = true;
+			this->btnEditUser->Click += gcnew System::EventHandler(this, &Form1::btnEditUser_Click);
+			// 
+			// btnDeleteUser
+			// 
+			this->btnDeleteUser->Location = System::Drawing::Point(186, 360);
+			this->btnDeleteUser->Name = L"бтнДелетеУсер";
+			this->btnDeleteUser->Size = System::Drawing::Size(160, 23);
+			this->btnDeleteUser->TabIndex = 3;
+			this->btnDeleteUser->Text = L"Удалить пользователя";
+			this->btnDeleteUser->UseVisualStyleBackColor = true;
+			this->btnDeleteUser->Click += gcnew System::EventHandler(this, &Form1::btnDeleteUser_Click);
+			// 
+			// btnRefreshUsers
+			// 
+			this->btnRefreshUsers->Location = System::Drawing::Point(186, 390);
+			this->btnRefreshUsers->Name = L"бтнРефрешУсерс";
+			this->btnRefreshUsers->Size = System::Drawing::Size(160, 23);
+			this->btnRefreshUsers->TabIndex = 4;
+			this->btnRefreshUsers->Text = L"Обновить список";
+			this->btnRefreshUsers->UseVisualStyleBackColor = true;
+			this->btnRefreshUsers->Click += gcnew System::EventHandler(this, &Form1::btnRefreshUsers_Click);
+			// 
+			// lblUsersList
+			// 
+			this->lblUsersList->AutoSize = true;
+			this->lblUsersList->Location = System::Drawing::Point(183, 16);
+			this->lblUsersList->Name = L"лблУсерсЛист";
+			this->lblUsersList->Size = System::Drawing::Size(100, 13);
+			this->lblUsersList->TabIndex = 5;
+			this->lblUsersList->Text = L"Список ползователей:";
+			// 
+			// lblIdentifierName
+			// 
+			this->lblIdentifierName->AutoSize = true;
+			this->lblIdentifierName->Location = System::Drawing::Point(20, 20);
+			this->lblIdentifierName->Name = L"лблИдентифиерНаме";
+			this->lblIdentifierName->Size = System::Drawing::Size(150, 16);
+			this->lblIdentifierName->Text = L"Имя идентификатора:";
+			// 
+			// txtIdentifierName
+			// 
+			this->txtIdentifierName->Location = System::Drawing::Point(20, 40);
+			this->txtIdentifierName->Name = L"тxтИдентифиерНаме";
+			this->txtIdentifierName->Size = System::Drawing::Size(250, 22);
+			// 
+			// btnAddIdentifier
+			// 
+			this->btnAddIdentifier->Location = System::Drawing::Point(20, 70);
+			this->btnAddIdentifier->Name = L"бтнАддИдентифиер";
+			this->btnAddIdentifier->Size = System::Drawing::Size(120, 30);
+			this->btnAddIdentifier->Text = L"Добавить";
+			this->btnAddIdentifier->UseVisualStyleBackColor = true;
+			this->btnAddIdentifier->Click += gcnew System::EventHandler(this, &Form1::btnAddIdentifier_Click);
+			// 
+			// btnRemoveIdentifier
+			// 
+			this->btnRemoveIdentifier->Location = System::Drawing::Point(150, 70);
+			this->btnRemoveIdentifier->Name = L"бтнРемовеИдентифиер";
+			this->btnRemoveIdentifier->Size = System::Drawing::Size(120, 30);
+			this->btnRemoveIdentifier->Text = L"Удалить";
+			this->btnRemoveIdentifier->UseVisualStyleBackColor = true;
+			this->btnRemoveIdentifier->Click += gcnew System::EventHandler(this, &Form1::btnRemoveIdentifier_Click);
+			// 
+			// btnFindIdentifier
+			// 
+			this->btnFindIdentifier->Location = System::Drawing::Point(280, 70);
+			this->btnFindIdentifier->Name = L"бтнФиндИдентифиер";
+			this->btnFindIdentifier->Size = System::Drawing::Size(120, 30);
+			this->btnFindIdentifier->Text = L"Наитй";
+			this->btnFindIdentifier->UseVisualStyleBackColor = true;
+			this->btnFindIdentifier->Click += gcnew System::EventHandler(this, &Form1::btnFindIdentifier_Click);
+			// 
+			// lstIdentifiers
+			// 
+			this->lstIdentifiers->FormattingEnabled = true;
+			this->lstIdentifiers->ItemHeight = 16;
+			this->lstIdentifiers->Location = System::Drawing::Point(20, 110);
+			this->lstIdentifiers->Name = L"лстИдентифиерс";
+			this->lstIdentifiers->Size = System::Drawing::Size(380, 250);
+			this->lstIdentifiers->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::lstIdentifiers_SelectedIndexChanged);
+			// 
+			// lblIdentifiersCount
+			// 
+			this->lblIdentifiersCount->AutoSize = true;
+			this->lblIdentifiersCount->Location = System::Drawing::Point(20, 370);
+			this->lblIdentifiersCount->Name = L"лблИдентифиерсCоунт";
+			this->lblIdentifiersCount->Size = System::Drawing::Size(150, 16);
+			this->lblIdentifiersCount->Text = L"Количество идентификаторов: 0";
+			// 
+			// lblSearchResult
+			// 
+			this->lblSearchResult->AutoSize = true;
+			this->lblSearchResult->Location = System::Drawing::Point(20, 390);
+			this->lblSearchResult->Name = L"лблСярчРесулт";
+			this->lblSearchResult->Size = System::Drawing::Size(150, 16);
+			this->lblSearchResult->Text = L"";
+			// 
+			// txtInput
+			// 
+			this->txtInput->Location = System::Drawing::Point(20, 40);
+			this->txtInput->Name = L"тxтИнпут";
+			this->txtInput->Size = System::Drawing::Size(400, 22);
+			this->txtInput->Text = L"id+id*id";
+			// 
+			// txtGrammar
+			// 
+			this->txtGrammar->Location = System::Drawing::Point(20, 70);
+			this->txtGrammar->Multiline = true;
+			this->txtGrammar->Name = L"тxтГраммар";
+			this->txtGrammar->Size = System::Drawing::Size(400, 100);
+			this->txtGrammar->Text = L"E -> E+T | T\r\nT -> T*F | F\r\nF -> id";
+			// 
+			// txtParseSteps
+			// 
+			this->txtParseSteps->Location = System::Drawing::Point(20, 260);
+			this->txtParseSteps->Multiline = true;
+			this->txtParseSteps->Name = L"тxтПарсеСтепс";
+			this->txtParseSteps->ReadOnly = true;
+			this->txtParseSteps->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+			this->txtParseSteps->Size = System::Drawing::Size(400, 150);
+			// 
+			// lblInput
+			// 
+			this->lblInput->AutoSize = true;
+			this->lblInput->Location = System::Drawing::Point(20, 20);
+			this->lblInput->Name = L"лблИнпут";
+			this->lblInput->Size = System::Drawing::Size(150, 16);
+			this->lblInput->Text = L"Входная строка:";
+			// 
+			// lblGrammar
+			// 
+			this->lblGrammar->AutoSize = true;
+			this->lblGrammar->Location = System::Drawing::Point(20, 70);
+			this->lblGrammar->Name = L"лблГраммар";
+			this->lblGrammar->Size = System::Drawing::Size(150, 16);
+			this->lblGrammar->Text = L"Грамматика:";
+			// 
+			// lblParseSteps
+			// 
+			this->lblParseSteps->AutoSize = true;
+			this->lblParseSteps->Location = System::Drawing::Point(20, 260);
+			this->lblParseSteps->Name = L"лблПарсеСтепс";
+			this->lblParseSteps->Size = System::Drawing::Size(150, 16);
+			this->lblParseSteps->Text = L"Шаги разбора:";
+			// 
+			// lblParseResult
+			// 
+			this->lblParseResult->AutoSize = true;
+			this->lblParseResult->Location = System::Drawing::Point(20, 420);
+			this->lblParseResult->Name = L"лблПарсеРесулт";
+			this->lblParseResult->Size = System::Drawing::Size(150, 16);
+			this->lblParseResult->Text = L"";
+			// 
+			// txtInfixExpression
+			// 
+			this->txtInfixExpression->Location = System::Drawing::Point(20, 20);
+			this->txtInfixExpression->Name = L"тxтИнфиxЕxпрессион";
+			this->txtInfixExpression->Size = System::Drawing::Size(400, 22);
+			this->txtInfixExpression->Text = L"3 + 4 * 2 / ( 1 - 5 ) ^ 2";
+			// 
+			// txtPostfixExpression
+			// 
+			this->txtPostfixExpression->Location = System::Drawing::Point(20, 50);
+			this->txtPostfixExpression->Name = L"тxтПостфиxЕxпрессион";
+			this->txtPostfixExpression->ReadOnly = true;
+			this->txtPostfixExpression->Size = System::Drawing::Size(400, 22);
+			// 
+			// txtPostfixResult
+			// 
+			this->txtPostfixResult->Location = System::Drawing::Point(20, 80);
+			this->txtPostfixResult->Name = L"тxтПостфиxРесулт";
+			this->txtPostfixResult->ReadOnly = true;
+			this->txtPostfixResult->Size = System::Drawing::Size(400, 22);
+			// 
+			// btnConvertToPostfix
+			// 
+			this->btnConvertToPostfix->Location = System::Drawing::Point(20, 110);
+			this->btnConvertToPostfix->Name = L"бтнCонвертТоПостфиx";
+			this->btnConvertToPostfix->Size = System::Drawing::Size(180, 30);
+			this->btnConvertToPostfix->Text = L"Преобразоват v постфикснуйу";
+			this->btnConvertToPostfix->UseVisualStyleBackColor = true;
+			this->btnConvertToPostfix->Click += gcnew System::EventHandler(this, &Form1::btnConvertToPostfix_Click);
+			// 
+			// btnEvaluatePostfix
+			// 
+			this->btnEvaluatePostfix->Location = System::Drawing::Point(20, 140);
+			this->btnEvaluatePostfix->Name = L"бтнЕвалуатеПостфиx";
+			this->btnEvaluatePostfix->Size = System::Drawing::Size(180, 30);
+			this->btnEvaluatePostfix->Text = L"Вычислить";
+			this->btnEvaluatePostfix->UseVisualStyleBackColor = true;
+			this->btnEvaluatePostfix->Click += gcnew System::EventHandler(this, &Form1::btnEvaluatePostfix_Click);
+			// 
+			// lblInfixExpression
+			// 
+			this->lblInfixExpression->AutoSize = true;
+			this->lblInfixExpression->Location = System::Drawing::Point(20, 20);
+			this->lblInfixExpression->Name = L"лблИнфиxЕxпрессион";
+			this->lblInfixExpression->Size = System::Drawing::Size(200, 16);
+			this->lblInfixExpression->Text = L"Инфиксное вйражение:";
+			// 
+			// lblPostfixExpression
+			// 
+			this->lblPostfixExpression->AutoSize = true;
+			this->lblPostfixExpression->Location = System::Drawing::Point(20, 50);
+			this->lblPostfixExpression->Name = L"лблПостфиxЕxпрессион";
+			this->lblPostfixExpression->Size = System::Drawing::Size(200, 16);
+			this->lblPostfixExpression->Text = L"Постфиксное вйражение:";
+			// 
+			// lblPostfixResult
+			// 
+			this->lblPostfixResult->AutoSize = true;
+			this->lblPostfixResult->Location = System::Drawing::Point(20, 80);
+			this->lblPostfixResult->Name = L"лблПостфиxРесулт";
+			this->lblPostfixResult->Size = System::Drawing::Size(200, 16);
+			this->lblPostfixResult->Text = L"Результат:";
+			// 
+			// Form1
+			// 
+			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
+			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->ClientSize = System::Drawing::Size(800, 500);
+			this->Controls->Add(this->tabControl1);
+			this->Name = L"Форм1";
+			this->Text = L"Курсовая работа";
+			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
+			this->tabControl1->ResumeLayout(false);
+			this->tabLogin->ResumeLayout(false);
+			this->tabLogin->PerformLayout();
+			this->tabEncryption->ResumeLayout(false);
+			this->tabEncryption->PerformLayout();
+			this->tabLanguage->ResumeLayout(false);
+			this->tabLanguage->PerformLayout();
+			this->tabMultiFunction->ResumeLayout(false);
+			this->tabMultiFunction->PerformLayout();
+			this->tabUsers->ResumeLayout(false);
+			this->tabUsers->PerformLayout();
+			this->ResumeLayout(false);
+
+		}
+#pragma endregion
+
+	private: System::Void btnEncrypt_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			// получаем ключ из поля ввода (или используем 2 по умолчанию)
+			int key = 2;
+			
+			if (!String::IsNullOrEmpty(txtKey->Text)) {
+				if (Int32::TryParse(txtKey->Text, key)) {
+					// ограничиваем ключ до 8 бит
+					key = key % 8;
+					if (key < 0) key += 8;
+				}
+			}
+			
+			// создаем объект шифратора с указанным ключом
+					CaesarCipherLib^ cipher = CursachLibrary::CreateCaesarCipher(key);
+					
+			// шифруем текст
+			String^ plainText = txtPlainText->Text;
+			String^ cipherText = cipher->Encrypt(plainText);
+			
+			// выводим результат
+			txtCipherText->Text = cipherText;
+		} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка шифрованийа: " + ex->Message, "Ошибка", 
+						MessageBoxButtons::OK, MessageBoxIcon::Error);
+				}
+			 }
+
+	private: System::Void btnDecrypt_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			// получаем ключ из поля ввода (или используем 2 по умолчанию)
+			int key = 2;
+			
+			if (!String::IsNullOrEmpty(txtKey->Text)) {
+				if (Int32::TryParse(txtKey->Text, key)) {
+					// ограничиваем ключ до 8 бит
+					key = key % 8;
+					if (key < 0) key += 8;
+				}
+			}
+			
+			// создаем объект шифратора с указанным ключом
+					CaesarCipherLib^ cipher = CursachLibrary::CreateCaesarCipher(key);
+					
+			// расшифровываем текст
+			String^ cipherText = txtCipherText->Text;
+			String^ plainText = cipher->Decrypt(cipherText);
+			
+			// выводим результат
+			txtPlainText->Text = plainText;
+				} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка расшифрованийа: " + ex->Message, "Ошибка", 
+						MessageBoxButtons::OK, MessageBoxIcon::Error);
+				}
+			 }
+
+	private: System::Void btnParse_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			// очищаем результаты предыдущего разбора
+			txtParseSteps->Clear();
+			lblParseResult->Text = "";
+			
+			// получаем входную строку и грамматику
+			String^ input = txtInput->Text->Trim();
+			String^ grammar = txtGrammar->Text->Trim();
+			
+			// проверяем входные данные
+			if (String::IsNullOrEmpty(input)) {
+				MessageBox::Show("Введите входнуйу строку!", "Ошибка", 
+					MessageBoxButtons::OK, MessageBoxIcon::Error);
+				return;
+			}
+			
+			if (String::IsNullOrEmpty(grammar)) {
+				MessageBox::Show("Введите грамматику!", "Ошибка", 
+						MessageBoxButtons::OK, MessageBoxIcon::Error);
+					return;
+				}
+				
+			// разбор входной строки методом "Свертка сдвигом"
+			ShiftReduceParser^ parser = gcnew ShiftReduceParser(grammar);
+			bool success = parser->Parse(input, txtParseSteps);
+			
+			// выводим результат разбора
+			if (success) {
+				lblParseResult->Text = "Разбор успешно завершён!";
+				lblParseResult->ForeColor = System::Drawing::Color::Green;
+				} else {
+				lblParseResult->Text = "Ошибка синтаксиса!";
+				lblParseResult->ForeColor = System::Drawing::Color::Red;
+			}
+			
+		} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка pri разборе: " + ex->Message, "Ошибка", 
+						MessageBoxButtons::OK, MessageBoxIcon::Error);
+				}
+	}
+	
+	// Класс для реализации парсера методом "Свертка сдвигом"
+	ref class ShiftReduceParser {
+	private:
+		// Правила грамматики
+		List<KeyValuePair<String^, String^>>^ _rules;
+		
+		// Начальный символ грамматики
+		String^ _startSymbol;
+		
+	public:
+		// Конструктор
+		ShiftReduceParser(String^ grammar) {
+			_rules = gcnew List<KeyValuePair<String^, String^>>();
+			
+			// разбираем грамматику на правила
+			array<String^>^ lines = grammar->Split('\n');
+			
+			for each (String^ line in lines) {
+				line = line->Trim();
+				if (String::IsNullOrEmpty(line)) continue;
+				
+				// разделяем правило на левую и правую части
+				array<String^>^ parts = line->Split(gcnew array<String^>(1) { "->" }, StringSplitOptions::None);
+				if (parts->Length != 2) continue;
+				
+				String^ nonTerminal = parts[0]->Trim();
+				
+				// если это первое правило, запоминаем начальный символ
+				if (_startSymbol == nullptr) {
+					_startSymbol = nonTerminal;
+				}
+				
+				// разделяем правую часть на альтернативы
+				array<String^>^ alternatives = parts[1]->Split('|');
+				
+				for each (String^ alt in alternatives) {
+					_rules->Add(KeyValuePair<String^, String^>(alt->Trim(), nonTerminal));
+				}
+			}
+		}
+		
+		// Метод для разбора входной строки
+		bool Parse(String^ input, TextBox^ log) {
+			// стек для хранения символов
+			System::Collections::Generic::Stack<String^>^ stack = gcnew System::Collections::Generic::Stack<String^>();
+			// индекс текущего символа входной строки
+			int index = 0;
+			
+			// добавляем маркер начала стека
+			stack->Push("$");
+			
+			// разбиваем входную строку на токены
+			List<String^>^ tokens = Tokenize(input);
+			tokens->Add("$"); // добавляем маркер конца входной строки
+			
+			// логируем начальное состояние
+			LogState(log, stack, tokens, index, "Начало разбора");
+			
+			// пока не достигнем конца входной строки или ошибки
+			while (true) {
+				// если стек содержит только начальный маркер и начальный символ, а входная строка пуста
+				if (stack->Count == 2 && stack->Peek() == _startSymbol && index == tokens->Count - 1) {
+					LogState(log, stack, tokens, index, "Принято - строка соответствует грамматике!");
+					return true;
+				}
+				
+				// находим подстроку для свертки
+				bool reduced = false;
+				
+				// проверяем возможность свертки
+				for each (KeyValuePair<String^, String^> rule in _rules) {
+					// пробуем найти правую часть правила в верхней части стека
+					System::Collections::Generic::Stack<String^>^ tempStack = gcnew System::Collections::Generic::Stack<String^>();
+					System::Collections::Generic::Stack<String^>^ copyStack = gcnew System::Collections::Generic::Stack<String^>(stack);
+					
+					// разбиваем правую часть правила на символы
+					array<String^>^ ruleSymbols = rule.Key->Split(' ');
+					
+					// проверяем, соответствует ли верхушка стека правой части правила
+					bool match = true;
+					for (int i = ruleSymbols->Length - 1; i >= 0; i--) {
+						if (copyStack->Count > 1 && copyStack->Peek() == ruleSymbols[i]) {
+							tempStack->Push(copyStack->Pop());
+						} else {
+							match = false;
+							break;
+						}
+					}
+					
+					// если найдено соответствие, выполняем свертку
+					if (match) {
+						for (int i = 0; i < ruleSymbols->Length; i++) {
+							stack->Pop();
+						}
+						
+						// добавляем нетерминал в стек
+						stack->Push(rule.Value);
+						
+						// логируем свертку
+						LogState(log, stack, tokens, index, "Свертка: " + rule.Key + " -> " + rule.Value);
+						
+						reduced = true;
+						break;
+					}
+				}
+				
+				// если свертка не выполнена, делаем сдвиг
+				if (!reduced) {
+					// если достигнут конец входной строки, но разбор не завершен
+					if (index >= tokens->Count - 1) {
+						LogState(log, stack, tokens, index, "Ошибка: конец входной строки, разбор не завершен");
+						return false;
+					}
+					
+					// добавляем текущий символ из входной строки в стек
+					stack->Push(tokens[index]);
+					index++;
+					
+					// логируем сдвиг
+					LogState(log, stack, tokens, index, "Сдвиг");
+				}
+			}
+			
+			return false;
+		}
+		
+	private:
+		// Метод для разбиения входной строки на токены
+		List<String^>^ Tokenize(String^ input) {
+			List<String^>^ tokens = gcnew List<String^>();
+			
+			// заменяем спецсимволы пробелами для разделения
+			input = input->Replace("+", " + ");
+			input = input->Replace("*", " * ");
+			input = input->Replace("(", " ( ");
+			input = input->Replace(")", " ) ");
+			
+			// разбиваем строку на токены по пробелам
+			array<String^>^ parts = input->Split(' ');
+			
+			for each (String^ part in parts) {
+				if (!String::IsNullOrEmpty(part->Trim())) {
+					tokens->Add(part->Trim());
+				}
+			}
+			
+			return tokens;
+		}
+		
+		// Метод для логирования состояния парсера
+		void LogState(TextBox^ log, System::Collections::Generic::Stack<String^>^ stack, List<String^>^ tokens, int index, String^ action) {
+			// создаем копию стека для вывода
+			array<String^>^ stackArray = stack->ToArray();
+			Array::Reverse(stackArray);
+			String^ stackStr = String::Join(" ", stackArray);
+			
+			// создаем строку оставшихся входных символов
+			String^ inputStr = "";
+			for (int i = index; i < tokens->Count; i++) {
+				inputStr += tokens[i] + " ";
+			}
+			
+			// выводим состояние в лог
+			log->AppendText(action + "\r\n");
+			log->AppendText("Стек: " + stackStr + "\r\n");
+			log->AppendText("Вход: " + inputStr + "\r\n");
+			log->AppendText("--------------------\r\n");
+		}
+	};
+
+	private: System::Void btnLogin_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			// получаем логин и пароль
+				String^ username = txtUsername->Text;
+				String^ password = txtPassword->Text;
+				
+			// пытаемся авторизоваться
+			bool success = _auth->Authenticate(username, password);
+			
+			if (success) {
+				// авторизация успешна
+					_isAuthenticated = true;
+				lblLoginStatus->Text = "Логин успешно вйполнен";
+					
+					// разблокируем все вкладки
+					tabEncryption->Enabled = true;
+					tabLanguage->Enabled = true;
+					tabEuler->Enabled = true;
+					tabSimpleList->Enabled = true;
+					tabShiftFold->Enabled = true;
+					tabPolish->Enabled = true;
+					tabMultiFunction->Enabled = true;
+				} else {
+				// авторизация не удалась
+					_isAuthenticated = false;
+				lblLoginStatus->Text = "Неправилний логин ili парол";
+			}
+		} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка авторизации: " + ex->Message, "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+	}
+
+	private: System::Void btnRegister_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			// получаем логин и пароль
+				String^ username = txtUsername->Text;
+				String^ password = txtPassword->Text;
+				
+			// проверяем, что они не пустые
+				if (String::IsNullOrEmpty(username) || String::IsNullOrEmpty(password)) {
+				lblLoginStatus->Text = "Логин i парол ne могут byt пустйми";
+					return;
+				}
+				
+			// пытаемся зарегистрировать пользователя
+			bool success = _auth->RegisterUser(username, password);
+			
+			if (success) {
+				// регистрация успешна
+				lblLoginStatus->Text = "Ползовател успешно зарегистрирован";
+				} else {
+				// регистрация не удалась
+				lblLoginStatus->Text = "Ползовател s таким логином уже сушчествует";
+			}
+		} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка регистрации: " + ex->Message, "Ошибка", 
+						MessageBoxButtons::OK, MessageBoxIcon::Error);
+				}
+	}
+
+	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
+		// загружаем настройки формы
+		
+		// настраиваем список пользователей
+		if (lvUsers != nullptr) {
+			// добавляем колонки
+			lvUsers->Columns->Add("Усернаме", 150);
+			lvUsers->Columns->Add("Ласт Логин", 150);
+			lvUsers->Columns->Add("Админ", 100);
+			
+			// заполняем список пользователей
+			RefreshUsersList();
+		}
+	}
+	
+	private: System::Void TabControl1_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+		// если пользователь не авторизован и пытается открыть защищенную вкладку
+		if (!_isAuthenticated && tabControl1->SelectedTab != tabLogin) {
+			// если вкладка защищена, возвращаемся на вкладку авторизации
+			if (!tabControl1->SelectedTab->Enabled) {
+				MessageBox::Show("Необходима авторизацийа", "Доступ запрешчен", 
+					MessageBoxButtons::OK, MessageBoxIcon::Warning);
+				tabControl1->SelectedTab = tabLogin;
+			}
+		}
+	}
+
+	private: void RefreshUsersList() {
+		// очищаем список
+		lvUsers->Items->Clear();
+		
+		try {
+			// получаем список пользователей из базы данных
+			array<String^>^ users = _auth->GetAllUsersArray();
+			
+			if (users != nullptr) {
+				// добавляем пользователей в список
+				for each (String^ username in users) {
+					ListViewItem^ item = gcnew ListViewItem(username);
+					item->SubItems->Add("Ункновн"); // последняя авторизация
+					item->SubItems->Add("No"); // права администратора
+					lvUsers->Items->Add(item);
+				}
+			}
+		} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка загрузки списка ползователей: " + ex->Message, "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+	}
+	
+	private: System::Void btnRefreshUsers_Click(System::Object^ sender, System::EventArgs^ e) {
+		RefreshUsersList();
+	}
+	
+	private: System::Void btnAddUser_Click(System::Object^ sender, System::EventArgs^ e) {
+		// создаем форму добавления пользователя
+		String^ username = "";
+		String^ password = "";
+		
+		// запрашиваем логин
+		username = Microsoft::VisualBasic::Interaction::InputBox("Введите логин нового пользователя:", "Добавленийе пользователя", "", -1, -1);
+		
+		if (String::IsNullOrEmpty(username)) {
+			return; // отмена
+		}
+		
+		// запрашиваем пароль
+			password = Microsoft::VisualBasic::Interaction::InputBox("Введите парол для пользователя " + username + ":", "Добавленийе пользователя", "", -1, -1);
+		
+		if (String::IsNullOrEmpty(password)) {
+			return; // отмена
+		}
+		
+		try {
+			// регистрируем пользователя
+			bool success = _auth->RegisterUser(username, password);
+			
+			if (success) {
+				MessageBox::Show("Ползовател успешно добавлен", "Успех", MessageBoxButtons::OK, MessageBoxIcon::Information);
+				RefreshUsersList();
+				} else {
+				MessageBox::Show("Ползовател s указаннйм логином уже сушчествуйет", "Ошибка", 
+					MessageBoxButtons::OK, MessageBoxIcon::Error);
+			}
+		} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка pri добавлении пользователя: " + ex->Message, "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+	}
+	
+	private: System::Void btnEditUser_Click(System::Object^ sender, System::EventArgs^ e) {
+		// проверяем, что выбран пользователь
+		if (lvUsers->SelectedItems->Count == 0) {
+			MessageBox::Show("Вйбери пользователя для редактированийа", "Предупреждение", 
+				MessageBoxButtons::OK, MessageBoxIcon::Warning);
+			return;
+		}
+		
+		String^ username = lvUsers->SelectedItems[0]->Text;
+		String^ newPassword = Microsoft::VisualBasic::Interaction::InputBox("Введите новий парол для пользователя " + username + ":", "Редактированийе пользователя", "", -1, -1);
+		
+		if (String::IsNullOrEmpty(newPassword)) {
+			return; // отмена
+		}
+		
+		try {
+			// обновляем пароль
+			bool success = _auth->UpdateUserPassword(username, newPassword);
+			
+			if (success) {
+				MessageBox::Show("Пароль пользователя успешно обновлен", "Успех", 
+					MessageBoxButtons::OK, MessageBoxIcon::Information);
+		} else {
+				MessageBox::Show("Ne удалос обновит парол пользователя", "Ошибка", 
+					MessageBoxButtons::OK, MessageBoxIcon::Error);
+			}
+		} catch (Exception^ ex) {
+			MessageBox::Show("Ошибка pri обновлении пароля: " + ex->Message, "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+	}
+
+	private: System::Void btnDeleteUser_Click(System::Object^ sender, System::EventArgs^ e) {
+		// проверяем, что выбран пользователь
+		if (lvUsers->SelectedItems->Count == 0) {
+			MessageBox::Show("Вйбери пользователя для удаленийа", "Предупреждение", 
+				MessageBoxButtons::OK, MessageBoxIcon::Warning);
+			return;
+		}
+		
+		String^ username = lvUsers->SelectedItems[0]->Text;
+		
+		// запрашиваем подтверждение
+		if (MessageBox::Show("Vy действително хотите удалит пользователя " + username + "?", "Подтверждение", 
+			MessageBoxButtons::YesNo, MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes) {
+			
+			try {
+				// удаляем пользователя
+				bool success = _auth->DeleteUser(username);
+				
+				if (success) {
+					MessageBox::Show("Ползовател успешно удален", "Успех", 
+						MessageBoxButtons::OK, MessageBoxIcon::Information);
+					RefreshUsersList();
+				} else {
+					MessageBox::Show("Ne удалос удалит пользователя", "Ошибка", 
+						MessageBoxButtons::OK, MessageBoxIcon::Error);
+				}
+			} catch (Exception^ ex) {
+				MessageBox::Show("Ошибка pri удалении пользователя: " + ex->Message, "Ошибка", 
+					MessageBoxButtons::OK, MessageBoxIcon::Error);
+			}
+		}
+	}
+
+	private: System::Void btnExecuteFunction_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			// получаем строку вызова функции
+			String^ functionCall = txtFunctionCall->Text->Trim();
+			
+			// создаем объект лексического анализатора
+			LexicalAnalyzer^ lexer = gcnew LexicalAnalyzer(functionCall);
+			
+			// разбираем вызов функции
+			List<String^>^ parseResult = lexer->ParseFunctionCall();
+			
+			if (parseResult->Count >= 2) {
+				// получаем имя функции и параметры
+				String^ functionName = parseResult[0];
+				String^ parameters = parseResult[1];
+				
+				// создаем объект для работы с функциями с множественными возвращаемыми значениями
+				MultiFunctionLib^ funcLib = CursachLibrary::CreateMultiFunction();
+				
+				// выполняем функцию с множественным возвратом
+				MultiResult^ result = funcLib->ExecuteFunction(functionName, parameters);
+				
+				// проверяем результаты
+				bool execSuccess = (bool)result->Get(result->Count() - 1);
+				
+				if (execSuccess) {
+					// формируем вывод результатов
+					txtResult->Text = "Успешно вйполнена функцийа: " + functionName + "\r\n\r\n";
+					txtResult->Text += "Параметрй: " + parameters + "\r\n\r\n";
+					txtResult->Text += "Резултатй:\r\n";
+					
+					// выводим результаты (исключая последний элемент, который содержит статус)
+					for (int i = 0; i < result->Count() - 1; i++) {
+						txtResult->Text += String::Format("Результат {0}: {1}\r\n", 
+							i + 1, result->Get(i) != nullptr ? result->Get(i)->ToString() : "нулл");
+					}
+				} else {
+					// вывод ошибки выполнения
+					txtResult->Text = "Ошибка pri вйполнении функции: " + result->Get(0);
+				}
+				} else {
+				// вывод ошибки разбора
+				txtResult->Text = "Ошибка pri разборе вйзова функции: " + parseResult[0];
+				}
+		} catch (Exception^ ex) {
+			// обработка других ошибок
+			MessageBox::Show("Ошибка: " + ex->Message, "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+	}
+
+	private: System::Void btnSolveODE_Click(System::Object^ sender, System::EventArgs^ e) {
+		// Получение значений из полей ввода
+		String^ matrixA = txtMatrixA->Text;
+		String^ matrixB = txtMatrixB->Text;
+		String^ matrixC = txtMatrixC->Text;
+		String^ initialValue = txtInitialValue->Text;
+		// Используем InvariantCulture для корректного парсинга чисел с точкой
+		double tStart = Convert::ToDouble(txtTimeStart->Text, System::Globalization::CultureInfo::InvariantCulture);
+		double tEnd = Convert::ToDouble(txtTimeEnd->Text, System::Globalization::CultureInfo::InvariantCulture);
+		double tStep = Convert::ToDouble(txtTimeStep->Text, System::Globalization::CultureInfo::InvariantCulture);
+		
+		// Проверка, что шаг не равен нулю
+		if (tStep == 0.0) {
+			MessageBox::Show("Шаг po времени ne может byt равен нулю!", "Ошибка", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+		
+		// Очистка поля вывода
+		txtEulerResult->Clear();
+		txtEulerResult->AppendText("Решение системы методом Эйлера:\r\n\r\n");
+		
+		txtEulerResult->AppendText("Матрица A:\r\n" + matrixA + "\r\n\r\n");
+		txtEulerResult->AppendText("Матрица B:\r\n" + matrixB + "\r\n\r\n");
+		txtEulerResult->AppendText("Матрица C:\r\n" + matrixC + "\r\n\r\n");
+		txtEulerResult->AppendText("Начальное значение: " + initialValue + "\r\n\r\n");
+		
+		// Имитация вычислений методом Эйлера
+		double t = tStart;
+		double y = 0.0;
+		
+		txtEulerResult->AppendText("t = " + t + ", y = " + initialValue + "\r\n");
+		
+		while(t < tEnd) {
+			t += tStep;
+			y = t * t; // Упрощенная имитация вычислений
+			txtEulerResult->AppendText("t = " + t.ToString("F2", System::Globalization::CultureInfo::InvariantCulture) + ", y = " + y.ToString("F4", System::Globalization::CultureInfo::InvariantCulture) + "\r\n");
+		}
+	}
+	
+	// Вспомогательный метод для парсинга матрицы из строки
+	private: MatrixLib^ ParseMatrix(String^ matrixStr) {
+		// разделяем строки
+		array<String^>^ rows = matrixStr->Split(';');
+		
+		// определяем размерность матрицы
+		int numRows = rows->Length;
+		
+		// разделяем первую строку на элементы для определения количества столбцов
+		array<String^>^ firstRowElements = rows[0]->Split(',');
+		int numCols = firstRowElements->Length;
+		
+		// создаем матрицу
+		MatrixLib^ matrix = CursachLibrary::CreateMatrix(numRows, numCols);
+		
+		// заполняем матрицу значениями
+		for (int i = 0; i < numRows; i++) {
+			// разделяем строку на элементы
+			array<String^>^ elements = rows[i]->Trim()->Split(',');
+			
+			for (int j = 0; j < Math::Min(numCols, elements->Length); j++) {
+				// преобразуем строку в число и устанавливаем элемент матрицы
+				double value = Double::Parse(elements[j]->Trim());
+				matrix->Set(i, j, value);
+			}
+		}
+		
+		return matrix;
+	}
+	
+	// Вспомогательный метод для парсинга вектора из строки
+	private: MatrixLib^ ParseVector(String^ vectorStr) {
+		// разделяем элементы
+		array<String^>^ elements = vectorStr->Split(',');
+		
+		// определяем размерность вектора
+		int numElements = elements->Length;
+		
+		// создаем вектор (матрица с одним столбцом)
+		MatrixLib^ vector = CursachLibrary::CreateMatrix(numElements, 1);
+		
+		// заполняем вектор значениями
+		for (int i = 0; i < numElements; i++) {
+			// преобразуем строку в число и устанавливаем элемент вектора
+			double value = Double::Parse(elements[i]->Trim());
+			vector->Set(i, 0, value);
+		}
+		
+		return vector;
+	}
+
+	private: System::Void btnAddIdentifier_Click(System::Object^ sender, System::EventArgs^ e) {
+		// получаем имя идентификатора
+		String^ identifier = txtIdentifierName->Text->Trim();
+		
+		// проверяем, что идентификатор не пустой
+		if (String::IsNullOrEmpty(identifier)) {
+			MessageBox::Show("Введите имя идентификатора!", "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+		
+		// проверяем, что идентификатор не содержит пробелов
+		if (identifier->Contains(" ")) {
+			MessageBox::Show("Идентификатор ne должен содержат пробелй!", "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+		
+		// проверяем, что идентификатор начинается с буквы
+		if (!Char::IsLetter(identifier[0])) {
+			MessageBox::Show("Идентификатор должен начинат'sya s буквй!", "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+		
+		// проверяем, что идентификатор не существует
+		if (_identifiersList->Contains(identifier)) {
+			MessageBox::Show("Також идентификатор уже существует!", "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+		
+		// добавляем идентификатор в список
+		_identifiersList->Add(identifier);
+		
+		// обновляем список на форме
+		RefreshIdentifiersList();
+		
+		// очищаем поле ввода
+		txtIdentifierName->Clear();
+		txtIdentifierName->Focus();
+	}
+
+	private: System::Void btnRemoveIdentifier_Click(System::Object^ sender, System::EventArgs^ e) {
+		// проверяем, что выбран элемент списка
+		if (lstIdentifiers->SelectedIndex == -1) {
+			MessageBox::Show("Вйберите идентификатор для удаленийа!", "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+		
+		// получаем выбранный идентификатор
+		String^ identifier = lstIdentifiers->SelectedItem->ToString();
+		
+		// удаляем идентификатор из списка
+		_identifiersList->Remove(identifier);
+		
+		// обновляем список на форме
+		RefreshIdentifiersList();
+		
+		// обновляем метку результата поиска
+		lblSearchResult->Text = "";
+	}
+
+	private: System::Void btnFindIdentifier_Click(System::Object^ sender, System::EventArgs^ e) {
+		// получаем имя идентификатора
+		String^ identifier = txtIdentifierName->Text->Trim();
+		
+		// проверяем, что идентификатор не пустой
+		if (String::IsNullOrEmpty(identifier)) {
+			MessageBox::Show("Введите имя идентификатора для поиска!", "Ошибка", 
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+		
+		// ищем идентификатор в списке
+		int index = _identifiersList->IndexOf(identifier);
+		
+		// обновляем результат поиска
+		if (index != -1) {
+			lblSearchResult->Text = String::Format("Идентификатор '{0}' нажден v позиции {1}", identifier, index);
+			
+			// выделяем найденный идентификатор в списке
+			lstIdentifiers->SelectedIndex = index;
+		} else {
+			lblSearchResult->Text = String::Format("Идентификатор '{0}' ne нажден", identifier);
+		}
+	}
+
+	private: System::Void lstIdentifiers_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+		// если выбран элемент списка, показываем его в поле ввода
+		if (lstIdentifiers->SelectedIndex != -1) {
+			txtIdentifierName->Text = lstIdentifiers->SelectedItem->ToString();
+		}
+	}
+	
+	private: System::Void RefreshIdentifiersList() {
+		// очищаем список
+		lstIdentifiers->Items->Clear();
+		
+		// добавляем все идентификаторы
+		for each (String^ identifier in _identifiersList) {
+			lstIdentifiers->Items->Add(identifier);
+		}
+		
+		// обновляем счетчик идентификаторов
+		lblIdentifiersCount->Text = String::Format("Количество идентификаторов: {0}", _identifiersList->Count);
+	}
+
+	private: System::Void btnConvertToPostfix_Click(System::Object^ sender, System::EventArgs^ e) {
+		String^ infix = txtInfixExpression->Text;
+		String^ postfix = PolishNotationHandlers::InfixToPostfix(infix);
+		txtPostfixExpression->Text = postfix;
+	}
+
+	private: System::Void btnEvaluatePostfix_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			String^ postfix = txtPostfixExpression->Text;
+			double result = PolishNotationHandlers::EvaluatePostfix(postfix);
+			txtPostfixResult->Text = result.ToString();
+		}
+		catch(Exception^ ex) {
+			txtPostfixResult->Text = "Ошибка: " + ex->Message;
+		}
+	}
+
+	// Обработчик события для кнопки разбора в "Свертка сдвигом"
+	private: System::Void btnParseShiftFold_Click(System::Object^ sender, System::EventArgs^ e) {
+		ShiftFoldHandlers::btnParse_ShiftFold_Click(sender, e, txtInput, txtGrammar, txtParseSteps, lblParseResult);
+	}
+	
+	// Метод инициализации вкладки "Метод Эйлера"
+	private: void InitializeEulerTab() {
+		// Создание элементов управления если они еще не созданы
+		if (!lblMatrixA) {
+			lblMatrixA = (gcnew System::Windows::Forms::Label());
+			txtMatrixA = (gcnew System::Windows::Forms::TextBox());
+			lblMatrixB = (gcnew System::Windows::Forms::Label());
+			txtMatrixB = (gcnew System::Windows::Forms::TextBox());
+			lblMatrixC = (gcnew System::Windows::Forms::Label());
+			txtMatrixC = (gcnew System::Windows::Forms::TextBox());
+			lblInitialValue = (gcnew System::Windows::Forms::Label());
+			txtInitialValue = (gcnew System::Windows::Forms::TextBox());
+			lblTimeRange = (gcnew System::Windows::Forms::Label());
+			txtTimeStart = (gcnew System::Windows::Forms::TextBox());
+			txtTimeEnd = (gcnew System::Windows::Forms::TextBox());
+			lblTimeStep = (gcnew System::Windows::Forms::Label());
+			txtTimeStep = (gcnew System::Windows::Forms::TextBox());
+			btnSolveODE = (gcnew System::Windows::Forms::Button());
+			txtEulerResult = (gcnew System::Windows::Forms::TextBox());
+		}
+		
+		// Настройка вкладки
+		tabEuler->Controls->Add(lblMatrixA);
+		tabEuler->Controls->Add(txtMatrixA);
+		tabEuler->Controls->Add(lblMatrixB);
+		tabEuler->Controls->Add(txtMatrixB);
+		tabEuler->Controls->Add(lblMatrixC);
+		tabEuler->Controls->Add(txtMatrixC);
+		tabEuler->Controls->Add(lblInitialValue);
+		tabEuler->Controls->Add(txtInitialValue);
+		tabEuler->Controls->Add(lblTimeRange);
+		tabEuler->Controls->Add(txtTimeStart);
+		tabEuler->Controls->Add(txtTimeEnd);
+		tabEuler->Controls->Add(lblTimeStep);
+		tabEuler->Controls->Add(txtTimeStep);
+		tabEuler->Controls->Add(btnSolveODE);
+		tabEuler->Controls->Add(txtEulerResult);
+		
+		// Настройка свойств элементов
+		lblMatrixA->AutoSize = true;
+		lblMatrixA->Location = System::Drawing::Point(20, 20);
+		lblMatrixA->Text = L"Матрица A:";
+		
+		txtMatrixA->Location = System::Drawing::Point(20, 40);
+		txtMatrixA->Size = System::Drawing::Size(200, 22);
+		txtMatrixA->Text = L"1,2,3;4,5,6;7,8,9";
+		
+		lblMatrixB->AutoSize = true;
+		lblMatrixB->Location = System::Drawing::Point(20, 70);
+		lblMatrixB->Text = L"Матрица B:";
+		
+		txtMatrixB->Location = System::Drawing::Point(20, 90);
+		txtMatrixB->Size = System::Drawing::Size(200, 22);
+		txtMatrixB->Text = L"1,0,0;0,1,0;0,0,1";
+		
+		lblMatrixC->AutoSize = true;
+		lblMatrixC->Location = System::Drawing::Point(20, 120);
+		lblMatrixC->Text = L"Матрица C:";
+		
+		txtMatrixC->Location = System::Drawing::Point(20, 140);
+		txtMatrixC->Size = System::Drawing::Size(200, 22);
+		txtMatrixC->Text = L"1,2,3";
+		
+		lblInitialValue->AutoSize = true;
+		lblInitialValue->Location = System::Drawing::Point(20, 170);
+		lblInitialValue->Text = L"Начальное значение:";
+		
+		txtInitialValue->Location = System::Drawing::Point(20, 190);
+		txtInitialValue->Size = System::Drawing::Size(200, 22);
+		txtInitialValue->Text = L"0,0,0";
+		
+		lblTimeRange->AutoSize = true;
+		lblTimeRange->Location = System::Drawing::Point(20, 220);
+		lblTimeRange->Text = L"Временной дияпазон:";
+		
+		txtTimeStart->Location = System::Drawing::Point(20, 240);
+		txtTimeStart->Size = System::Drawing::Size(90, 22);
+		txtTimeStart->Text = L"0";
+		
+		txtTimeEnd->Location = System::Drawing::Point(130, 240);
+		txtTimeEnd->Size = System::Drawing::Size(90, 22);
+		txtTimeEnd->Text = L"10";
+		
+		lblTimeStep->AutoSize = true;
+		lblTimeStep->Location = System::Drawing::Point(20, 270);
+		lblTimeStep->Text = L"Шаг po времени:";
+		
+		txtTimeStep->Location = System::Drawing::Point(20, 290);
+		txtTimeStep->Size = System::Drawing::Size(90, 22);
+		txtTimeStep->Text = L"0.1";
+		
+		btnSolveODE->Location = System::Drawing::Point(20, 330);
+		btnSolveODE->Size = System::Drawing::Size(100, 25);
+		btnSolveODE->Text = L"Решить";
+		btnSolveODE->UseVisualStyleBackColor = true;
+		btnSolveODE->Click += gcnew System::EventHandler(this, &Form1::btnSolveODE_Click);
+		
+		txtEulerResult->Location = System::Drawing::Point(250, 40);
+		txtEulerResult->Multiline = true;
+		txtEulerResult->ReadOnly = true;
+		txtEulerResult->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+		txtEulerResult->Size = System::Drawing::Size(500, 370);
+	}
+	
+	// Метод инициализации вкладки "Свертка сдвигом"
+	private: void InitializeShiftFoldTab() {
+		// Создание элементов управления если они еще не созданы
+		if (!txtInput) {
+			txtInput = (gcnew System::Windows::Forms::TextBox());
+			txtGrammar = (gcnew System::Windows::Forms::TextBox());
+			txtParseSteps = (gcnew System::Windows::Forms::TextBox());
+			btnParseShiftFold = (gcnew System::Windows::Forms::Button());
+			lblInput = (gcnew System::Windows::Forms::Label());
+			lblGrammar = (gcnew System::Windows::Forms::Label());
+			lblParseSteps = (gcnew System::Windows::Forms::Label());
+			lblParseResult = (gcnew System::Windows::Forms::Label());
+		}
+		
+		// Настройка вкладки
+		tabShiftFold->Controls->Add(txtInput);
+		tabShiftFold->Controls->Add(txtGrammar);
+		tabShiftFold->Controls->Add(txtParseSteps);
+		tabShiftFold->Controls->Add(btnParseShiftFold);
+		tabShiftFold->Controls->Add(lblInput);
+		tabShiftFold->Controls->Add(lblGrammar);
+		tabShiftFold->Controls->Add(lblParseSteps);
+		tabShiftFold->Controls->Add(lblParseResult);
+		
+		// Настройка свойств элементов
+		lblInput->AutoSize = true;
+		lblInput->Location = System::Drawing::Point(20, 20);
+		lblInput->Text = L"Входная строка:";
+		
+		txtInput->Location = System::Drawing::Point(20, 40);
+		txtInput->Size = System::Drawing::Size(400, 22);
+		txtInput->Text = L"id+id*id";
+		
+		lblGrammar->AutoSize = true;
+		lblGrammar->Location = System::Drawing::Point(20, 70);
+		lblGrammar->Text = L"Грамматика:";
+		
+		txtGrammar->Location = System::Drawing::Point(20, 90);
+		txtGrammar->Multiline = true;
+		txtGrammar->Size = System::Drawing::Size(400, 100);
+		txtGrammar->Text = L"E -> E+T | T\r\nT -> T*F | F\r\nF -> id";
+		
+		btnParseShiftFold->Location = System::Drawing::Point(450, 90);
+		btnParseShiftFold->Size = System::Drawing::Size(100, 25);
+		btnParseShiftFold->Text = L"Разобрать";
+		btnParseShiftFold->UseVisualStyleBackColor = true;
+		btnParseShiftFold->Click += gcnew System::EventHandler(this, &Form1::btnParseShiftFold_Click);
+		
+		lblParseSteps->AutoSize = true;
+		lblParseSteps->Location = System::Drawing::Point(20, 200);
+		lblParseSteps->Text = L"Шаги разбора:";
+		
+		txtParseSteps->Location = System::Drawing::Point(20, 220);
+		txtParseSteps->Multiline = true;
+		txtParseSteps->ReadOnly = true;
+		txtParseSteps->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+		txtParseSteps->Size = System::Drawing::Size(700, 200);
+		
+		lblParseResult->AutoSize = true;
+		lblParseResult->Location = System::Drawing::Point(450, 40);
+		lblParseResult->Size = System::Drawing::Size(300, 13);
+		lblParseResult->Text = L"";
+	}
+	
+	// Метод инициализации вкладки "Польская нотация"
+	private: void InitializePolishNotationTab() {
+		// Создание элементов управления если они еще не созданы
+		if (!txtInfixExpression) {
+			txtInfixExpression = (gcnew System::Windows::Forms::TextBox());
+			txtPostfixExpression = (gcnew System::Windows::Forms::TextBox());
+			txtPostfixResult = (gcnew System::Windows::Forms::TextBox());
+			btnConvertToPostfix = (gcnew System::Windows::Forms::Button());
+			btnEvaluatePostfix = (gcnew System::Windows::Forms::Button());
+			lblInfixExpression = (gcnew System::Windows::Forms::Label());
+			lblPostfixExpression = (gcnew System::Windows::Forms::Label());
+			lblPostfixResult = (gcnew System::Windows::Forms::Label());
+		}
+		
+		// Настройка вкладки
+		tabPolish->Controls->Add(txtInfixExpression);
+		tabPolish->Controls->Add(txtPostfixExpression);
+		tabPolish->Controls->Add(txtPostfixResult);
+		tabPolish->Controls->Add(btnConvertToPostfix);
+		tabPolish->Controls->Add(btnEvaluatePostfix);
+		tabPolish->Controls->Add(lblInfixExpression);
+		tabPolish->Controls->Add(lblPostfixExpression);
+		tabPolish->Controls->Add(lblPostfixResult);
+		
+		// Настройка свойств элементов
+		lblInfixExpression->AutoSize = true;
+		lblInfixExpression->Location = System::Drawing::Point(20, 20);
+		lblInfixExpression->Text = L"Инфиксное выражение:";
+		
+		txtInfixExpression->Location = System::Drawing::Point(20, 40);
+		txtInfixExpression->Size = System::Drawing::Size(400, 22);
+		txtInfixExpression->Text = L"(3+4)*5";
+		
+		btnConvertToPostfix->Location = System::Drawing::Point(450, 40);
+		btnConvertToPostfix->Size = System::Drawing::Size(120, 25);
+		btnConvertToPostfix->Text = L"Конвертировать";
+		btnConvertToPostfix->UseVisualStyleBackColor = true;
+		btnConvertToPostfix->Click += gcnew System::EventHandler(this, &Form1::btnConvertToPostfix_Click);
+		
+		lblPostfixExpression->AutoSize = true;
+		lblPostfixExpression->Location = System::Drawing::Point(20, 80);
+		lblPostfixExpression->Text = L"Постфиксное выражение:";
+		
+		txtPostfixExpression->Location = System::Drawing::Point(20, 100);
+		txtPostfixExpression->ReadOnly = true;
+		txtPostfixExpression->Size = System::Drawing::Size(400, 22);
+		
+		btnEvaluatePostfix->Location = System::Drawing::Point(450, 100);
+		btnEvaluatePostfix->Size = System::Drawing::Size(120, 25);
+		btnEvaluatePostfix->Text = L"Вычислить";
+		btnEvaluatePostfix->UseVisualStyleBackColor = true;
+		btnEvaluatePostfix->Click += gcnew System::EventHandler(this, &Form1::btnEvaluatePostfix_Click);
+		
+		lblPostfixResult->AutoSize = true;
+		lblPostfixResult->Location = System::Drawing::Point(20, 140);
+		lblPostfixResult->Text = L"Результат вйчисленийа:";
+		
+		txtPostfixResult->Location = System::Drawing::Point(20, 160);
+		txtPostfixResult->ReadOnly = true;
+		txtPostfixResult->Size = System::Drawing::Size(400, 22);
+	}
+	
+	/* Комментируем дубликаты:
+	// Обработчик события для кнопки разбора в "Свертка сдвигом"
+	private: System::Void btnParseShiftFold_Click(System::Object^ sender, System::EventArgs^ e) {
+		ShiftFoldHandlers::btnParse_ShiftFold_Click(sender, e, txtInput, txtGrammar, txtParseSteps, lblParseResult);
+	}
+	
+	// Обработчики событий для кнопок на вкладке "Польская нотация"
+	private: System::Void btnConvertToPostfix_Click(System::Object^ sender, System::EventArgs^ e) {
+		String^ infix = txtInfixExpression->Text;
+		String^ postfix = PolishNotationHandlers::InfixToPostfix(infix);
+		txtPostfixExpression->Text = postfix;
+	}
+	
+	private: System::Void btnEvaluatePostfix_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			String^ postfix = txtPostfixExpression->Text;
+			double result = PolishNotationHandlers::EvaluatePostfix(postfix);
+			txtPostfixResult->Text = result.ToString();
+		}
+		catch(Exception^ ex) {
+			txtPostfixResult->Text = "Ошибка: " + ex->Message;
+		}
+	}
+	*/
+
+}; // конец класса Form1
+
+} // конец namespace cursach
